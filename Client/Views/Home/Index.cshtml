@@ -1,0 +1,31 @@
+﻿@using Common.Models
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Tip prevoza</th>
+                <th scope="col">Cena</th>
+                <th scope="col">Datum polaska</th>
+                <th scope="col">Datum povratka</th>
+                <th scope="col">Broj dostupnih karata</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Trip trip in ViewBag.List)
+           {
+               <tr>
+                   <td>@trip.Id</td>
+                   <td>@trip.Type</td>
+                   <td>@trip.Price</td>
+                   <td>@trip.Depart</td>
+                   <td>@trip.Return</td>
+                   <td>@trip.AvailableTickets</td>
+               </tr>
+           }
+        </tbody>
+    </table>
+</div>
