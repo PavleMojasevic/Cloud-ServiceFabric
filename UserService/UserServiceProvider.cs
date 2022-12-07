@@ -28,7 +28,7 @@ namespace UserService
             }
         }
 
-        public async Task<bool> Prepare(string username)
+        public async Task<bool> PrepareRegistration(string username)
         {
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -45,6 +45,16 @@ namespace UserService
                 bool result = await users.TryAddAsync(tx, user.Username, user);
                 await tx.CommitAsync(); 
             }
-        } 
+        }
+
+        public async Task RollbackRegistration(string username)
+        {
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
+                await users.TryRemoveAsync(tx, username);
+                await tx.CommitAsync();
+            }
+        }
     }
 }

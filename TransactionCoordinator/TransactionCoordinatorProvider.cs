@@ -24,8 +24,8 @@ namespace TransactionCoordinator
             var bankService =await ServiceFabricClientHelper.GetBankService(); 
             var userService =await ServiceFabricClientHelper.GetUserService(); 
 
-            bool bankResponse=await bankService.InvokeWithRetryAsync(client => client.Channel.Prepare(accountNumber));
-            bool userResponse=await userService.InvokeWithRetryAsync(client => client.Channel.Prepare(user.Username));
+            bool bankResponse=await bankService.InvokeWithRetryAsync(client => client.Channel.PrepareAdd(accountNumber));
+            bool userResponse=await userService.InvokeWithRetryAsync(client => client.Channel.PrepareRegistration(user.Username));
 
             if(bankResponse && userResponse)
             {
@@ -38,7 +38,8 @@ namespace TransactionCoordinator
                 }
                 catch (Exception e)
                 {
-                    return false;
+                    await bankService.InvokeWithRetryAsync(client => client.Channel.RemoveAccount(accountNumber));
+                    await userService.InvokeWithRetryAsync(client => client.Channel.RollbackRegistration(user.Username));
                 }
             }
             return false;

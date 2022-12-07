@@ -14,8 +14,10 @@ namespace Common.Interfaces
         [OperationContract]
         Task<bool> Login(string username, string password);
         [OperationContract]
-        Task<bool> Prepare(string username);
+        Task<bool> PrepareRegistration(string username);
         [OperationContract]
         Task Registration(User user);
+        [OperationContract]
+        Task RollbackRegistration(string username);
     }
 }
