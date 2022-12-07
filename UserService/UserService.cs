@@ -1,10 +1,15 @@
-﻿using Microsoft.ServiceFabric.Data.Collections;
+﻿using Common.Interfaces;
+using Common.Models;
+using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Communication.Wcf;
+using Microsoft.ServiceFabric.Services.Communication.Wcf.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +33,28 @@ namespace UserService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return new[]{
+                new ServiceReplicaListener(context => this.CreateWcfCommunication(context),"UserService")
+
+                };
+        }
+
+
+        private ICommunicationListener CreateWcfCommunication(StatefulServiceContext context)
+        {
+            string host = context.NodeContext.IPAddressOrFQDN;
+            var end_point_config = context.CodePackageActivationContext.GetEndpoint("UserService");
+            int port = end_point_config.Port;
+            var scheme = end_point_config.Protocol.ToString();
+
+            string uri = string.Format("net.{0}://{1}:{2}/UserService", scheme, host, port);
+
+            var listener = new WcfCommunicationListener<IUserService>(
+                serviceContext: context,
+                wcfServiceObject: new UserServiceProvider(this.StateManager),
+                listenerBinding: WcfUtility.CreateTcpListenerBinding(),
+                address: new System.ServiceModel.EndpointAddress(uri));
+            return listener;
         }
 
         /// <summary>
@@ -42,6 +68,7 @@ namespace UserService
             //       or remove this RunAsync override if it's not needed in your service.
 
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
+            var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
 
             while (true)
             {

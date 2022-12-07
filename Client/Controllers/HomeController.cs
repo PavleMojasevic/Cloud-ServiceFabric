@@ -14,24 +14,45 @@ namespace Client.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index(FilterDto filter)
+        public async Task<IActionResult> Index(FilterDto filter, string message)
         {
             /*IEnumerable<string> x = HttpContext.Session.Keys;
             if (!HttpContext.Session.Keys.Contains("user"))
             {
                 return RedirectToAction("Index", "Login");
-            }*/
-            var binding = new NetTcpBinding(SecurityMode.None);
-            var endpoint = new EndpointAddress("net.tcp://localhost:53851/StationService");
-            ChannelFactory<IStationService> channelFactory = new ChannelFactory<IStationService>(binding, endpoint);
-            var proxy = channelFactory.CreateChannel();
+            }*/ 
+            var proxy = WcfHelper.GetStationService();
 
-            List<Trip> list = await proxy.GetTrips(filter);
-            ViewBag.List=(list);
+            Dictionary<long,Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x=>x.Id);
+            ViewBag.List=list;
+            ViewData["Purchase"] = purchase;
+            ViewBag.Message=message;
             ViewData["Title"] = "Početna strana";
             return View();
         }
+        private static Purchase purchase = new Purchase();//TODO: u sesiju
+        public async Task<IActionResult> AddTrip(long tripId, decimal price)
+        {
+            if(purchase.TripIds.Contains(tripId))
+            {
+                purchase.Quantities[purchase.TripIds.IndexOf(tripId)]++;
+                purchase.Amounts[purchase.TripIds.IndexOf(tripId)]+= price;
+            }
+            else
+            {
+                purchase.TripIds.Add(tripId);
+                purchase.Quantities.Add(1);
+                purchase.Amounts.Add(price);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+        public async Task<IActionResult> MakePurchase()
+        {
+            return RedirectToAction("Index", "Home");
 
-       
+        }
+
+
+
     }
 }

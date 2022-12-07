@@ -1,31 +1,76 @@
 ﻿@using Common.Models
-@{
-    ViewData["Title"] = "Home Page";
-}
+@using System.Linq
+@using System.Collections.Generic
 <div class="container">
+    <h1>Kupovina karata</h1>
+    <p>@ViewBag.Message</p>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th scope="col">Id</th>
                 <th scope="col">Tip prevoza</th>
+                <th scope="col">Odredište</th>
                 <th scope="col">Cena</th>
                 <th scope="col">Datum polaska</th>
                 <th scope="col">Datum povratka</th>
-                <th scope="col">Broj dostupnih karata</th>
+                <th scope="col">Datum povratka</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (Trip trip in ViewBag.List)
-           {
-               <tr>
-                   <td>@trip.Id</td>
-                   <td>@trip.Type</td>
-                   <td>@trip.Price</td>
-                   <td>@trip.Depart</td>
-                   <td>@trip.Return</td>
-                   <td>@trip.AvailableTickets</td>
-               </tr>
-           }
+            @foreach (Trip trip in ViewBag.List.Values)
+            {
+                <tr>
+                    <td>@trip.Id</td>
+                    <td>@trip.Type</td>
+                    <td>@trip.Destination</td>
+                    <td>@trip.Price</td>
+                    <td>@trip.Depart</td>
+                    <td>@trip.Return</td>
+                    <td>@trip.AvailableTickets</td>
+                    <td><button class="btn btn-success" onclick="Add(@trip.Id, @trip.Price)">Dodaj</button></td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
+@if (ViewData["Purchase"] != null)
+{
+
+
+    <div class="container">
+        <h3>Korpa</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Odredište</th>
+                    <th scope="col">Količina</th>
+                    <th scope="col">Ukupno</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < (ViewData["Purchase"] as Purchase).TripIds.Count; i++)
+                {
+                    <tr>
+                        <td>@((ViewData["Purchase"] as Purchase).TripIds[i])</td>
+                        <td>@(ViewBag.List[ViewBag.Purchase.TripIds[i]].Destination)</td>
+                        <td>@((ViewData["Purchase"] as Purchase).Quantities[i])</td>
+                        <td>@((ViewData["Purchase"] as Purchase).Amounts[i]) RSD</td> 
+                    </tr>
+                }
+            </tbody>
+        </table> 
+        <h3>Ukupno: @((ViewData["Purchase"] as Purchase).Amounts.Sum()) RSD </h3>
+    </div>
+}
+<script>
+    function Add(tripId, price) {
+        window.location = ('/Home/AddTrip?tripId=' + tripId+"&price="+price);
+
+    }
+    function MakePurchase() {
+        window.location = ('/Home/MakePurchase');
+
+    }
+</script>

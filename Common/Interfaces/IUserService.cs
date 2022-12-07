@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 namespace Common.Interfaces
 {
     [ServiceContract]
-    public interface ITransactionCoordinator
-    { 
+    public interface IUserService
+    {
         [OperationContract]
-        Task<bool> Registration(User user, string accountNumber);
+        Task<bool> Login(string username, string password);
+        [OperationContract]
+        Task<bool> Prepare(string username);
+        [OperationContract]
+        Task Registration(User user);
     }
 }

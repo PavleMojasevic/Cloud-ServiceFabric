@@ -53,7 +53,7 @@ namespace StationService
                 wcfServiceObject: new StationServiceProvider(this.StateManager),
                 listenerBinding: WcfUtility.CreateTcpListenerBinding(),
                 address: new System.ServiceModel.EndpointAddress(uri));
-            return listener;
+            return listener;    
         }
 
         /// <summary>
@@ -78,9 +78,10 @@ namespace StationService
                         AvailableTickets = 10,
                         Depart = DateTime.Now.AddDays(10+i),
                         Price = i*100+1000,
-                        Type = TripType.Train,
-                        TotalTickets = 10
-                    };
+                        Type = TripType.Voz,
+                        TotalTickets = 10,
+                        Destination="Pariz"
+                    }; 
                     bool result=await trips.TryAddAsync(tx, trip.Id,trip);
                 }
                 tx.CommitAsync();

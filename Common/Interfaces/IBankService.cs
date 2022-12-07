@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 namespace Common.Interfaces
 {
     [ServiceContract]
-    public interface ILoginService
+    public interface IBankService
     {
         [OperationContract]
-        Task<bool> Login(string username, string password); 
-
+        Task<bool> Prepare(string accountNumber);
+        [OperationContract]
+        Task AddAccount(string accountNumber);
     }
 }

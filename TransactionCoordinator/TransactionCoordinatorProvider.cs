@@ -18,10 +18,30 @@ namespace TransactionCoordinator
         {
             this.stateManager = stateManager;
         }
-
-        public async Task<List<Trip>> GetTrips(FilterDto filter)
+         
+        public async Task<bool> Registration(User user, string accountNumber)
         {
-            return new List<Trip>();
+            var bankService =await ServiceFabricClientHelper.GetBankService(); 
+            var userService =await ServiceFabricClientHelper.GetUserService(); 
+
+            bool bankResponse=await bankService.InvokeWithRetryAsync(client => client.Channel.Prepare(accountNumber));
+            bool userResponse=await userService.InvokeWithRetryAsync(client => client.Channel.Prepare(user.Username));
+
+            if(bankResponse && userResponse)
+            {
+                try
+                {
+                    await bankService.InvokeWithRetryAsync(client => client.Channel.AddAccount(accountNumber));
+                    await userService.InvokeWithRetryAsync(client => client.Channel.Registration(user)); 
+                    return true;
+                    //TODO dodati recnike
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

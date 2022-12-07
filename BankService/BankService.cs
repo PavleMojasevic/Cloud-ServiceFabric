@@ -1,5 +1,9 @@
-﻿using Microsoft.ServiceFabric.Data.Collections;
+﻿using Common.Interfaces;
+using Common.Models;
+using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Communication.Wcf;
+using Microsoft.ServiceFabric.Services.Communication.Wcf.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using System;
 using System.Collections.Generic;
@@ -28,7 +32,18 @@ namespace BankService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return new[]{
+                new ServiceReplicaListener(context =>
+                {
+                    return new  WcfCommunicationListener<IBankService>(context,
+                            new BankServiceProvider(this.StateManager),
+                            WcfUtility.CreateTcpListenerBinding(),
+                            "BankService"
+
+                        );
+                },"BankService")
+
+                };
         }
 
         /// <summary>
@@ -41,6 +56,7 @@ namespace BankService
             // TODO: Replace the following sample code with your own logic 
             //       or remove this RunAsync override if it's not needed in your service.
 
+            var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
 
             while (true)

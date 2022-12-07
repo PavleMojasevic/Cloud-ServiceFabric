@@ -27,25 +27,28 @@ namespace Client.Controllers
         //-----------ACTIONS-----------
         public async Task<IActionResult> Login(string username, string password)
         {
-            var binding = new NetTcpBinding(SecurityMode.None);
-            var endpoint = new EndpointAddress("net.tcp://localhost:53852/LoginService");
-            ChannelFactory<ILoginService> channelFactory = new ChannelFactory<ILoginService>(binding, endpoint);
-            var proxy = channelFactory.CreateChannel();
+
+            var proxy = WcfHelper.GetUserService();
 
             bool result = await proxy.Login(username, password);
             if(result)
             {
-                HttpContext.Session.SetString("user",username);
+                //HttpContext.Session.SetString("user",username);
                 return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Index", "Login", new { message = "Ne postoji korisnik sa unetim podacima" });
         } 
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register(User user, string accountNumber)
         {
+            ITransactionCoordinator proxy = WcfHelper.GetTransactionCoordinator();
 
-
-
-            return RedirectToAction("");
+            bool result = await proxy.Registration(user, accountNumber);
+            if (result)
+            { 
+                return RedirectToAction("Index", "Login");
+            }
+            return RedirectToAction("Registracija", "Login", new { message = "Ne postoji korisnik sa unetim podacima" }); 
+             
         }
         #endregion
     }

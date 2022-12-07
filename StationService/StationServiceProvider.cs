@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StationService
 {
-    internal class StationServiceProvider : IStationService
+    public class StationServiceProvider : IStationService
     {
         private IReliableStateManager StateManager;
 
