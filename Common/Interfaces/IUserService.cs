@@ -12,11 +12,13 @@ namespace Common.Interfaces
     public interface IUserService
     {
         [OperationContract]
-        Task<bool> Login(string username, string password);
+        Task<User> Login(string username, string password);
         [OperationContract]
         Task<bool> PrepareRegistration(string username);
         [OperationContract]
         Task Registration(User user);
+        [OperationContract]
+        Task<User> AddPurchase(string username, Purchase purchase);
         [OperationContract]
         Task RollbackRegistration(string username);
     }

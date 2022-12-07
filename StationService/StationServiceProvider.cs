@@ -33,12 +33,42 @@ namespace StationService
                     }
                 }
             }
-            if(filter.Depart!=null)
-                result=result.Where(x=>x.Depart==filter.Depart).ToList();
-            if(filter.Quantity!=null)
-                result=result.Where(x=>x.AvailableTickets == filter.Quantity).ToList();
-            if(filter.Type != null)
-                result=result.Where(x=>x.Type ==filter.Type).ToList();
+            result = result.Where(x => x.Depart > System.DateTime.Now).ToList();
+            if (filter.Depart != null)
+                result = result.Where(x => x.Depart == filter.Depart).ToList();
+            if (filter.Quantity != null)
+                result = result.Where(x => x.AvailableTickets == filter.Quantity).ToList();
+            if (filter.Type != null)
+                result = result.Where(x => x.Type == filter.Type).ToList();
+            return result;
+        }
+        public async Task<List<Trip>> GetTripsHistory(SortType type)
+        {
+            List<Trip> result = new List<Trip>();
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+                IAsyncEnumerable<KeyValuePair<long, Trip>> enumerable = await trips.CreateEnumerableAsync(tx);
+                using (IAsyncEnumerator<KeyValuePair<long, Trip>> e = enumerable.GetAsyncEnumerator())
+                {
+                    while (await e.MoveNextAsync(System.Threading.CancellationToken.None).ConfigureAwait(false))
+                    {
+                        result.Add(e.Current.Value);
+                    }
+                }
+            }
+            result = result.Where(x => x.Depart < System.DateTime.Now).ToList();
+            switch (type)
+            {
+                case SortType.Depart:
+                    return result.OrderBy(x => x.Depart).ToList(); 
+                case SortType.DepartDESC:
+                    return result.OrderByDescending(x => x.Depart).ToList();
+                case SortType.COUNTAVAILABLE:
+                    return result.OrderBy(x => x.AvailableTickets).ToList();
+                case SortType.COUNTAVAILABLEDESC:
+                    return result.OrderByDescending(x => x.AvailableTickets).ToList();
+            }
             return result;
         }
     }

@@ -8,16 +8,20 @@ using System.Threading.Tasks;
 namespace Client.Controllers
 {
     public class LoginController : Controller
-    { 
+    {
         public async Task<IActionResult> Index(string message)
         {
-            
+            if (HttpContext.Session.GetObjectFromSession<User>("user") != null)
+                return RedirectToAction("Index", "Home");
+
             ViewData["Title"] = "Početna strana";
             ViewBag.Message = message;
             return View();
         }
         public async Task<IActionResult> Registracija(string message)
         {
+            if (HttpContext.Session.GetObjectFromSession<User>("user") != null)
+                return RedirectToAction("Index", "Home");
             ViewData["Title"] = "Početna strana";
             ViewBag.Message = message;
             return View();
@@ -30,25 +34,32 @@ namespace Client.Controllers
 
             var proxy = WcfHelper.GetUserService();
 
-            bool result = await proxy.Login(username, password);
-            if(result)
+            User result = await proxy.Login(username, password);
+            if (result != null)
             {
-                //HttpContext.Session.SetString("user",username);
+                HttpContext.Session.SetObjectInSession("user", result);
+                var x = HttpContext.Session.GetString("user");
+                var y = HttpContext.Session.GetObjectFromSession<User>("user");
                 return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Index", "Login", new { message = "Ne postoji korisnik sa unetim podacima" });
-        } 
+        }
+        public async Task<IActionResult> Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Login");
+        }
         public async Task<IActionResult> Register(User user, string accountNumber)
         {
             ITransactionCoordinator proxy = WcfHelper.GetTransactionCoordinator();
 
             bool result = await proxy.Registration(user, accountNumber);
             if (result)
-            { 
+            {
                 return RedirectToAction("Index", "Login");
             }
-            return RedirectToAction("Registracija", "Login", new { message = "Ne postoji korisnik sa unetim podacima" }); 
-             
+            return RedirectToAction("Registracija", "Login", new { message = "Ne postoji korisnik sa unetim podacima" });
+
         }
         #endregion
     }

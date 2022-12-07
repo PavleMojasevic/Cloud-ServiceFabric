@@ -16,6 +16,8 @@ namespace Client.Controllers
     {
         public async Task<IActionResult> Index(FilterDto filter, string message)
         {
+            if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
+                return RedirectToAction("Index", "Login");
             /*IEnumerable<string> x = HttpContext.Session.Keys;
             if (!HttpContext.Session.Keys.Contains("user"))
             {
@@ -33,7 +35,9 @@ namespace Client.Controllers
         private static Purchase purchase = new Purchase();//TODO: u sesiju
         public async Task<IActionResult> AddTrip(long tripId, decimal price)
         {
-            if(purchase.TripIds.Contains(tripId))
+            if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
+                return RedirectToAction("Index", "Login");
+            if (purchase.TripIds.Contains(tripId))
             {
                 purchase.Quantities[purchase.TripIds.IndexOf(tripId)]++;
                 purchase.Amounts[purchase.TripIds.IndexOf(tripId)]+= price;
@@ -48,6 +52,10 @@ namespace Client.Controllers
         }
         public async Task<IActionResult> MakePurchase()
         {
+            if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
+                return RedirectToAction("Index", "Login");
+
+
             return RedirectToAction("Index", "Home");
 
         }

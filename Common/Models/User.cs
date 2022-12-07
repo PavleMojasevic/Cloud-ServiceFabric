@@ -19,6 +19,6 @@ namespace Common.Models
         [DataMember]
         public string BankAccountNumber { get; set; }
         [DataMember]
-        public List<string> Tickets { get; set; }
+        public List<Purchase> Purchases { get; set; } = new List<Purchase>();
     }
 }

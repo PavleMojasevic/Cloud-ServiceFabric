@@ -1,21 +1,25 @@
-﻿using System;
+﻿using Common.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Models
+namespace Common
 {
+     
     [DataContract]
-    public enum TripType
+    public enum SortType
     {
         [EnumMember]
-        Avion,
+        Depart,
         [EnumMember]
-        Autobus,
+        DepartDESC,
         [EnumMember]
-        Voz
+        COUNTAVAILABLE,
+        [EnumMember]
+        COUNTAVAILABLEDESC
 
     }
 }

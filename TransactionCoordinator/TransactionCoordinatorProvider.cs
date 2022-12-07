@@ -22,8 +22,8 @@ namespace TransactionCoordinator
         public async Task<bool> Registration(User user, string accountNumber)
         {
             var bankService =await ServiceFabricClientHelper.GetBankService(); 
-            var userService =await ServiceFabricClientHelper.GetUserService(); 
-
+            var userService =await ServiceFabricClientHelper.GetUserService();
+            user.BankAccountNumber = accountNumber;
             bool bankResponse=await bankService.InvokeWithRetryAsync(client => client.Channel.PrepareAdd(accountNumber));
             bool userResponse=await userService.InvokeWithRetryAsync(client => client.Channel.PrepareRegistration(user.Username));
 

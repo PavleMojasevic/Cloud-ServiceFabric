@@ -107,6 +107,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTO\SortType.cs" />
     <Compile Include="DTO\FilterDto.cs" />
     <Compile Include="DTO\TicketDto.cs" />
     <Compile Include="ServiceFabricClientHelper.cs" />
