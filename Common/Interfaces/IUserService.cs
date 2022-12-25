@@ -21,5 +21,9 @@ namespace Common.Interfaces
         Task<User> AddPurchase(string username, Purchase purchase);
         [OperationContract]
         Task RollbackRegistration(string username);
+        [OperationContract]
+        Task<List<Purchase>> GetPurchases(string username);
+        [OperationContract]
+        Task<User> RemovePurchase(string username, Purchase purchase);
     }
 }

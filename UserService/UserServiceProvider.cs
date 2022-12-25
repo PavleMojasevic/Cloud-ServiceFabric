@@ -2,6 +2,7 @@
 using Common.Models;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace UserService
@@ -62,6 +63,7 @@ namespace UserService
         {
             using (var tx = this.StateManager.CreateTransaction())
             {
+                purchase.Date = System.DateTime.Now;
                 var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
                 User user = (await users.TryGetValueAsync(tx, username)).Value;
                 user.Purchases.Add(purchase);
@@ -69,6 +71,28 @@ namespace UserService
                 await tx.CommitAsync();
                 return user;
             }
+        }
+        public async Task<User> RemovePurchase(string username, Purchase purchase)
+        {
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                
+                var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
+                User user = (await users.TryGetValueAsync(tx, username)).Value;
+                user.Purchases.Remove(purchase);
+                await users.AddOrUpdateAsync(tx, username, user, (k, v) => v);
+                await tx.CommitAsync();
+                return user;
+            }
+        }
+        public async Task<List<Purchase>>GetPurchases(string username)
+        { 
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
+                User user = (await users.TryGetValueAsync(tx, username)).Value;
+                return user.Purchases;
+            } 
         }
         
     }

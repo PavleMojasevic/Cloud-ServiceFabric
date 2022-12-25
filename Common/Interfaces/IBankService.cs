@@ -13,7 +13,7 @@ namespace Common.Interfaces
         [OperationContract]
         Task<bool> PrepareAdd(string accountNumber);
         [OperationContract]
-        Task AddAccount(string accountNumber);
+        Task AddAccount(string accountNumber, string username);
         [OperationContract]
         Task RemoveAccount(string accountNumber);
         [OperationContract]
@@ -22,5 +22,7 @@ namespace Common.Interfaces
         Task AddFunds(string accountNumber, decimal amount);
         [OperationContract]
         Task<bool> Pay(string accountNumber, decimal amount);
+        [OperationContract]
+        Task Refund(string bankAccountNumber, decimal amount);
     }
 }

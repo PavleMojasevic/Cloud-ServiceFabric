@@ -18,6 +18,32 @@ namespace StationService
             this.StateManager = stateManager;
         }
 
+        public async Task AddTrip(Trip trip)
+        {
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                bool result = await trips.TryAddAsync(tx, trip.Id, trip);
+            }
+        }
+
+            public async Task BuyTickets(Purchase purchase)
+        {
+
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                for (int i = 0; i < purchase.TripIds.Count; i++)
+                {
+                    long tripId = purchase.TripIds[i];
+                    Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
+                    trip.AvailableTickets -= purchase.Quantities[i]; 
+                    await trips.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
+                }
+                await tx.CommitAsync();
+            }
+        }
+
         public async Task<List<Trip>> GetTrips(FilterDto filter)
         {
             List<Trip> result = new List<Trip>();
@@ -70,6 +96,39 @@ namespace StationService
                     return result.OrderByDescending(x => x.AvailableTickets).ToList();
             }
             return result;
+        }
+
+        public async Task<bool> IsAvailable(Purchase purchase)
+        {
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                for (int i = 0; i < purchase.TripIds.Count; i++)
+                {
+                    long tripId = purchase.TripIds[i];
+                    Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
+                    if (trip.AvailableTickets < purchase.Quantities[i])
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public async Task RollbackBuyTickets(Purchase purchase)
+        {
+
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                for (int i = 0; i < purchase.TripIds.Count; i++)
+                {
+                    long tripId = purchase.TripIds[i];
+                    Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
+                    trip.AvailableTickets += purchase.Quantities[i];
+                    await trips.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
+                }
+                await tx.CommitAsync();
+            }
         }
     }
 }

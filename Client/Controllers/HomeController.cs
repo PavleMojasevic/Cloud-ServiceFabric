@@ -16,31 +16,53 @@ namespace Client.Controllers
     {
         public async Task<IActionResult> Index(FilterDto filter, string message)
         {
-            if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
-                return RedirectToAction("Index", "Login");
-            /*IEnumerable<string> x = HttpContext.Session.Keys;
-            if (!HttpContext.Session.Keys.Contains("user"))
-            {
-                return RedirectToAction("Index", "Login");
-            }*/ 
             var proxy = WcfHelper.GetStationService();
-
-            Dictionary<long,Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x=>x.Id);
-            ViewBag.List=list;
+            Dictionary<long, Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x => x.Id);
+            ViewBag.List = list;
+            Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
             ViewData["Purchase"] = purchase;
-            ViewBag.Message=message;
+            ViewBag.Message = message;
             ViewData["Title"] = "Početna strana";
             return View();
         }
-        private static Purchase purchase = new Purchase();//TODO: u sesiju
+        public async Task<IActionResult> Purchases(string message)
+        {
+            User user = HttpContext.Session.GetObjectFromSession<User>("user");
+            if (user == null)
+                return RedirectToAction("Index", "Login");
+            var proxy = WcfHelper.GetUserService();
+            List<Purchase> list = await proxy.GetPurchases(user.Username);
+            ViewBag.List = list;
+            ViewBag.Message = message;
+            ViewData["Title"] = "Istorija kupovina";
+            return View();
+        }
+        public async Task<IActionResult> CancelPurchase(string purchaseId)
+        {
+            User user = HttpContext.Session.GetObjectFromSession<User>("user");
+            if (user == null)
+                return RedirectToAction("Index", "Login");
+            var proxy = WcfHelper.GetTransactionCoordinator();
+
+            await proxy.CancelPurchase(user, Guid.Parse(purchaseId));
+            return RedirectToAction("Index", "Home");
+        }
+        public async Task<IActionResult> AddNewTrip(Trip trip)
+        {
+
+            var proxy = WcfHelper.GetStationService();
+            await proxy.AddTrip(trip);
+            return RedirectToAction("Index", "Home");
+        }
         public async Task<IActionResult> AddTrip(long tripId, decimal price)
         {
-            if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
-                return RedirectToAction("Index", "Login");
+            Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
+            if (purchase == null)
+                purchase = new Purchase();
             if (purchase.TripIds.Contains(tripId))
             {
                 purchase.Quantities[purchase.TripIds.IndexOf(tripId)]++;
-                purchase.Amounts[purchase.TripIds.IndexOf(tripId)]+= price;
+                purchase.Amounts[purchase.TripIds.IndexOf(tripId)] += price;
             }
             else
             {
@@ -48,6 +70,15 @@ namespace Client.Controllers
                 purchase.Quantities.Add(1);
                 purchase.Amounts.Add(price);
             }
+            HttpContext.Session.SetObjectInSession("purchase", purchase);
+            return RedirectToAction("Index", "Home");
+        }
+        public async Task<IActionResult> RemoveTrip(int index)
+        {
+            Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
+            purchase.Quantities.RemoveAt(index);
+            purchase.Amounts.RemoveAt(index);
+            HttpContext.Session.SetObjectInSession("purchase", purchase);
             return RedirectToAction("Index", "Home");
         }
         public async Task<IActionResult> MakePurchase()
@@ -55,6 +86,11 @@ namespace Client.Controllers
             if (HttpContext.Session.GetObjectFromSession<User>("user") == null)
                 return RedirectToAction("Index", "Login");
 
+            var proxy = WcfHelper.GetTransactionCoordinator();
+            Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
+            await proxy.MakePurchase(HttpContext.Session.GetObjectFromSession<User>("user"), purchase);
+
+            HttpContext.Session.Remove("purchase");
 
             return RedirectToAction("Index", "Home");
 

@@ -11,9 +11,11 @@ namespace Common.Models
     public class Purchase
     {
         [DataMember]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [DataMember]
-        public int UserId { get; set; }
+        public string Username{ get; set; }
+        [DataMember]
+        public DateTime Date{ get; set; }
         [DataMember]
         public List<long> TripIds { get; set; } = new List<long>();
         [DataMember]

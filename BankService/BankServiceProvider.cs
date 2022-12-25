@@ -20,7 +20,7 @@ namespace BankService
             this.StateManager = stateManager;
         }
 
-        public async Task AddAccount(string accountNumber)
+        public async Task AddAccount(string accountNumber, string username)
         {
             var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
@@ -28,7 +28,8 @@ namespace BankService
                 BankAccount account = new BankAccount
                 {
                     AccountNumber = accountNumber,
-                    AvailableFunds = 1000 + random.Next(10000)
+                    Username=username,
+                    AvailableFunds = 3000 + random.Next(10000)
                 };
                 bool result = await users.TryAddAsync(tx, accountNumber, account);
                 await tx.CommitAsync();
@@ -47,30 +48,41 @@ namespace BankService
 
         public async Task RemoveAccount(string accountNumber)
         {
-            var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
+            var accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
             { 
-                await users.TryRemoveAsync(tx, accountNumber);
+                await accounts.TryRemoveAsync(tx, accountNumber);
                 await tx.CommitAsync();
 
             }
         }
-
 
         public async Task<bool> Pay(string accountNumber, decimal amount)
         {
             IReliableDictionary<string, BankAccount> accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
             {
-                BankAccount acc =(await accounts.TryGetValueAsync(tx, accountNumber, LockMode.Update)).Value;
+                BankAccount acc = (await accounts.TryGetValueAsync(tx, accountNumber, LockMode.Update)).Value;
                 acc.AvailableFunds -= amount;
                 if (acc.AvailableFunds < 0)
                     return false;
-                await accounts.AddOrUpdateAsync(tx, accountNumber, acc, (k,v)=>v);
+                await accounts.AddOrUpdateAsync(tx, accountNumber, acc, (k, v) => v);
                 await tx.CommitAsync();
 
             }
             return true;
+        }  
+        public async Task Refund(string accountNumber, decimal amount)
+        {
+            IReliableDictionary<string, BankAccount> accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                BankAccount acc =(await accounts.TryGetValueAsync(tx, accountNumber, LockMode.Update)).Value;
+                acc.AvailableFunds += amount; 
+                await accounts.AddOrUpdateAsync(tx, accountNumber, acc, (k,v)=>v);
+                await tx.CommitAsync();
+
+            } 
         }
         public async Task AddFunds(string accountNumber, decimal amount)
         {

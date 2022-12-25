@@ -13,7 +13,7 @@
                 <th scope="col">Cena</th>
                 <th scope="col">Datum polaska</th>
                 <th scope="col">Datum povratka</th>
-                <th scope="col">Datum povratka</th>
+                <th scope="col">Broj karata</th>
                 <th scope="col"></th>
             </tr>
         </thead>
@@ -47,6 +47,7 @@
                     <th scope="col">Odredište</th>
                     <th scope="col">Količina</th>
                     <th scope="col">Ukupno</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -56,12 +57,14 @@
                         <td>@((ViewData["Purchase"] as Purchase).TripIds[i])</td>
                         <td>@(ViewBag.List[ViewBag.Purchase.TripIds[i]].Destination)</td>
                         <td>@((ViewData["Purchase"] as Purchase).Quantities[i])</td>
-                        <td>@((ViewData["Purchase"] as Purchase).Amounts[i]) RSD</td> 
+                        <td>@((ViewData["Purchase"] as Purchase).Amounts[i]) RSD</td>
+                        <td> <button class="btn btn-danger" onclick="Remove(@i)">Ukloni</button></td>
                     </tr>
                 }
             </tbody>
-        </table> 
+        </table>
         <h3>Ukupno: @((ViewData["Purchase"] as Purchase).Amounts.Sum()) RSD </h3>
+        <button class="btn btn-success" onclick="MakePurchase()">Kupi</button>
     </div>
 }
 <script>
@@ -71,6 +74,10 @@
     }
     function MakePurchase() {
         window.location = ('/Home/MakePurchase');
+
+    }
+    function Remove(id) {
+        window.location = ('/Home/RemoveTrip?tripId=' + tripId);
 
     }
 </script>

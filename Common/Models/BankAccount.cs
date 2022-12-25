@@ -11,6 +11,8 @@ namespace Common.Models
     public class BankAccount
     {
         [DataMember]
+        public string Username { get; set; }
+        [DataMember]
         public string AccountNumber { get; set; }
         [DataMember]
         public decimal AvailableFunds { get; set; }

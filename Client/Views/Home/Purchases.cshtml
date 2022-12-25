@@ -1,0 +1,32 @@
+﻿@using Common.Models
+@using System.Linq
+@using System.Collections.Generic
+<div class="container">
+    <h1>Istorija porudzbina</h1>
+    <p>@ViewBag.Message</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Datum</th>
+                <th scope="col">Iznos</th> 
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Purchase purchase in ViewBag.List)
+            {
+                <tr>
+                    <td>@purchase.Date.ToString("dd.MM.yyyy")</td>
+                    <td>@purchase.Amounts.Sum()</td> 
+                    <td><button class="btn btn-danger" onclick="Cancel('@purchase.Id.ToString()')">Poništi</button></td> 
+                </tr>
+            }
+        </tbody>
+    </table>
+</div> 
+<script>
+    function Cancel(purchaseId) {
+        window.location = ('/Home/CancelPurchase?purchaseId=' + purchaseId );
+
+    } 
+</script>

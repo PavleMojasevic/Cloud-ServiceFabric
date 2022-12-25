@@ -55,5 +55,24 @@ namespace Common
 
 
         }
+        public static async Task<ServicePartitionClient<WcfCommunicationClient<IStationService>>> GetStationService()
+        {
+            FabricClient fabricClient = new FabricClient();
+
+            int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/StationService"))).Count;
+            var binding = WcfUtility.CreateTcpClientBinding();
+
+            int index = 0;
+            //TODO: for
+            ServicePartitionClient<WcfCommunicationClient<IStationService>> servicePartitionClient = new
+                ServicePartitionClient<WcfCommunicationClient<IStationService>>(
+                    new WcfCommunicationClientFactory<IStationService>(clientBinding: binding),
+                    new Uri("fabric:/CloudProjekat/StationService"),
+                    new ServicePartitionKey(0));
+             
+            return servicePartitionClient;
+
+
+        }
     }
 }

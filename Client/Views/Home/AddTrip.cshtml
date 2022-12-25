@@ -1,0 +1,39 @@
+﻿@using Common.Models
+@using System.Linq
+@using System.Collections.Generic
+<div class="container">
+    <h1>Novo putovanje</h1>
+    <p>@ViewBag.Message</p>
+    <form class="table" action="~/Home/AddNewTrip">
+        <div class="form-group">
+            <label>Odredište</label>
+            <input type="text" name="Destination" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Odredište</label>
+            <select name="Type" class="form-control" required>
+                <option value="0">Avion</option>
+                <option value="1">Autobus</option>
+                <option value="2">Voz</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cena</label>
+            <input type="number" name="Price" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Datum polaska</label>
+            <input type="date" name="Depart" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Datum povratka</label>
+            <input type="date" name="Return" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Broj karata</label>
+            <input type="number" name="TotalTickets" class="form-control" required>
+        </div>
+        <br />
+        <button type="submit" class="glyphicon-sort-by-attributes btn-primary">Dodaj putovanje</button>
+    </form>
+</div>

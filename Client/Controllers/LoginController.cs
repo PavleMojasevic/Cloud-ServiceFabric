@@ -37,9 +37,7 @@ namespace Client.Controllers
             User result = await proxy.Login(username, password);
             if (result != null)
             {
-                HttpContext.Session.SetObjectInSession("user", result);
-                var x = HttpContext.Session.GetString("user");
-                var y = HttpContext.Session.GetObjectFromSession<User>("user");
+                HttpContext.Session.SetObjectInSession("user", result); 
                 return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Index", "Login", new { message = "Ne postoji korisnik sa unetim podacima" });

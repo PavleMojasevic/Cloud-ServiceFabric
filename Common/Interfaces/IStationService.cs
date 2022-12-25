@@ -13,5 +13,13 @@ namespace Common.Interfaces
     {
         [OperationContract]
         Task<List<Trip>> GetTrips(FilterDto filter);
+        [OperationContract]
+        Task<bool> IsAvailable(Purchase purchase);
+        [OperationContract]
+        Task BuyTickets(Purchase purchase);
+        [OperationContract]
+        Task RollbackBuyTickets(Purchase purchase);
+        [OperationContract]
+        Task AddTrip(Trip trip);
     }
 }
