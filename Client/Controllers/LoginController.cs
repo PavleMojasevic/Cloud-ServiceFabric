@@ -16,6 +16,7 @@ namespace Client.Controllers
 
             ViewData["Title"] = "Početna strana";
             ViewBag.Message = message;
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
             return View();
         }
         public async Task<IActionResult> Registracija(string message)
@@ -24,6 +25,7 @@ namespace Client.Controllers
                 return RedirectToAction("Index", "Home");
             ViewData["Title"] = "Početna strana";
             ViewBag.Message = message;
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
             return View();
         }
 
@@ -56,7 +58,7 @@ namespace Client.Controllers
             {
                 return RedirectToAction("Index", "Login");
             }
-            return RedirectToAction("Registracija", "Login", new { message = "Ne postoji korisnik sa unetim podacima" });
+            return RedirectToAction("Registracija", "Login", new { message = "Vec postoji korisnik sa unetim podacima" });
 
         }
         #endregion

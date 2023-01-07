@@ -23,6 +23,7 @@ namespace Client.Controllers
             ViewData["Purchase"] = purchase;
             ViewBag.Message = message;
             ViewData["Title"] = "Početna strana";
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
             return View();
         }
         public async Task<IActionResult> Purchases(string message)
@@ -34,7 +35,17 @@ namespace Client.Controllers
             List<Purchase> list = await proxy.GetPurchases(user.Username);
             ViewBag.List = list;
             ViewBag.Message = message;
-            ViewData["Title"] = "Istorija kupovina";
+            ViewData["Title"] = "Istorija kupovina"; 
+            
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
+
+            return View();
+        }
+        public async Task<IActionResult> AddTrip(string message)
+        { 
+            ViewBag.Message = message;
+            ViewData["Title"] = "Dodavanje putovanja";
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
             return View();
         }
         public async Task<IActionResult> CancelPurchase(string purchaseId)
@@ -54,7 +65,7 @@ namespace Client.Controllers
             await proxy.AddTrip(trip);
             return RedirectToAction("Index", "Home");
         }
-        public async Task<IActionResult> AddTrip(long tripId, decimal price)
+        public async Task<IActionResult> AddTripPurchase(long tripId, decimal price)
         {
             Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
             if (purchase == null)
@@ -76,6 +87,12 @@ namespace Client.Controllers
         public async Task<IActionResult> RemoveTrip(int index)
         {
             Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
+            if(purchase.Quantities.Count==1)
+            {
+                HttpContext.Session.Remove("purchase");
+                return RedirectToAction("Index", "Home");
+            }
+            purchase.TripIds.RemoveAt(index);
             purchase.Quantities.RemoveAt(index);
             purchase.Amounts.RemoveAt(index);
             HttpContext.Session.SetObjectInSession("purchase", purchase);

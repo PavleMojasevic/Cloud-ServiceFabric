@@ -18,6 +18,7 @@ namespace BankService
         public BankServiceProvider(IReliableStateManager stateManager)
         {
             this.StateManager = stateManager;
+            
         }
 
         public async Task AddAccount(string accountNumber, string username)

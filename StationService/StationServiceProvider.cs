@@ -20,6 +20,11 @@ namespace StationService
 
         public async Task AddTrip(Trip trip)
         {
+            var weatherService = await ServiceFabricClientHelper.GetWeatherService();
+
+            decimal? temperature = await weatherService.InvokeWithRetryAsync(client => client.Channel.GetTemperature(trip.Destination, trip.Depart));
+            
+            
             var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {

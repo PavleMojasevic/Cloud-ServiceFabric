@@ -25,15 +25,24 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Client</a>
+                </button> 
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Pocetna</a></li>
+                    @if (ViewBag.User==null)
+                    {
                     <li><a asp-area="" asp-controller="Login" asp-action="Index">Prijava</a></li>
-                    <li><a asp-area="" asp-controller="Login" asp-action="Registracija">Registracija</a></li>
+                        <li><a asp-area="" asp-controller="Login" asp-action="Registracija">Registracija</a></li>
+
+                    } 
+                    else
+                    {
+                    <li><a asp-area="" asp-controller="Home" asp-action="Purchases">Istorija kupovina</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="AddTrip">Dodaj putovanje</a></li>
                     <li><a asp-area="" asp-controller="Login" asp-action="Logout">Odjavi se</a></li>
+                        
+                    }
                 </ul>
             </div>
         </div>

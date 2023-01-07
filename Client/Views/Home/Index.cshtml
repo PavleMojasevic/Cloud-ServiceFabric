@@ -69,7 +69,7 @@
 }
 <script>
     function Add(tripId, price) {
-        window.location = ('/Home/AddTrip?tripId=' + tripId+"&price="+price);
+        window.location = ('/Home/AddTripPurchase?tripId=' + tripId + "&price=" + price);
 
     }
     function MakePurchase() {
@@ -77,7 +77,7 @@
 
     }
     function Remove(id) {
-        window.location = ('/Home/RemoveTrip?tripId=' + tripId);
+        window.location = ('/Home/RemoveTrip?tripId=' + id);
 
     }
 </script>

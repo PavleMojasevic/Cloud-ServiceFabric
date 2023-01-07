@@ -23,8 +23,7 @@ namespace BankService
                 ServiceRuntime.RegisterServiceAsync("BankServiceType",
                     context => new BankService(context)).GetAwaiter().GetResult();
 
-                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(BankService).Name);
-
+                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(BankService).Name); 
                 // Prevents this host process from terminating so services keep running.
                 Thread.Sleep(Timeout.Infinite);
             }

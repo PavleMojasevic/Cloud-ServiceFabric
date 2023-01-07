@@ -43,6 +43,7 @@
     <ProjectReference Include="..\StationService\StationService.csproj" />
     <ProjectReference Include="..\TransactionCoordinator\TransactionCoordinator.csproj" />
     <ProjectReference Include="..\UserService\UserService.csproj" />
+    <ProjectReference Include="..\WeatherAPI\WeatherAPI.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>
