@@ -12,7 +12,7 @@ namespace Common.Interfaces
     public interface ITransactionCoordinator
     {
         [OperationContract]
-        Task CancelPurchase(User user, Guid purchaseId);
+        Task<bool> CancelPurchase(User user, Guid purchaseId);
         [OperationContract]
         Task<bool> MakePurchase(User user, Purchase purchase);
         [OperationContract]

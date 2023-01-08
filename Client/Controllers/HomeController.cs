@@ -54,9 +54,12 @@ namespace Client.Controllers
             if (user == null)
                 return RedirectToAction("Index", "Login");
             var proxy = WcfHelper.GetTransactionCoordinator();
-
-            await proxy.CancelPurchase(user, Guid.Parse(purchaseId));
-            return RedirectToAction("Index", "Home");
+            string message = "Kupovina se ne može otkazati";
+            if(!await proxy.CancelPurchase(user, Guid.Parse(purchaseId)))
+            { 
+                return RedirectToAction("Purchases", "Home", new {message= message });
+            }
+            return RedirectToAction("Purchases", "Home");
         }
         public async Task<IActionResult> AddNewTrip(Trip trip)
         {

@@ -80,7 +80,7 @@ namespace UserService
                 
                 var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
                 User user = (await users.TryGetValueAsync(tx, username)).Value;
-                user.Purchases.Remove(purchase);
+                user.Purchases=user.Purchases.SkipWhile(x=>x.Id==purchase.Id).ToList();
                 await users.AddOrUpdateAsync(tx, username, user, (k, v) => v);
                 await tx.CommitAsync();
                 return user;

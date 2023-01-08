@@ -19,7 +19,7 @@ namespace TransactionCoordinator
             this.stateManager = stateManager;
         }
 
-        public async Task CancelPurchase(User user, Guid purchaseId)
+        public async Task<bool> CancelPurchase(User user, Guid purchaseId)
         {
             var bankService = await ServiceFabricClientHelper.GetBankService();
             var stationService = await ServiceFabricClientHelper.GetStationService();
@@ -27,9 +27,13 @@ namespace TransactionCoordinator
 
             Purchase purchase = user.Purchases.First(x => x.Id == purchaseId);
 
-            await bankService.InvokeWithRetryAsync(client => client.Channel.Refund(user.BankAccountNumber, purchase.Amounts.Sum()));
-            await stationService.InvokeWithRetryAsync(client => client.Channel.RollbackBuyTickets(purchase));
-            await userService.InvokeWithRetryAsync(client => client.Channel.RemovePurchase(user.Username, purchase));
+            if (await stationService.InvokeWithRetryAsync(client => client.Channel.ReturnTickets(purchase)))
+            { 
+                await userService.InvokeWithRetryAsync(client => client.Channel.RemovePurchase(user.Username, purchase));
+                await bankService.InvokeWithRetryAsync(client => client.Channel.Refund(user.BankAccountNumber, purchase.Amounts.Sum()));
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> MakePurchase(User user, Purchase purchase)
@@ -48,12 +52,12 @@ namespace TransactionCoordinator
                     await bankService.InvokeWithRetryAsync(client => client.Channel.Pay(user.BankAccountNumber, purchase.Amounts.Sum()));
                     await stationService.InvokeWithRetryAsync(client => client.Channel.BuyTickets(purchase));
                     await userService.InvokeWithRetryAsync(client => client.Channel.AddPurchase(user.Username, purchase));
-                    return true; 
+                    return true;
                 }
                 catch (Exception e)
                 {
                     await bankService.InvokeWithRetryAsync(client => client.Channel.Refund(user.BankAccountNumber, purchase.Amounts.Sum()));
-                    await stationService.InvokeWithRetryAsync(client => client.Channel.RollbackBuyTickets(purchase));
+                    await stationService.InvokeWithRetryAsync(client => client.Channel.ReturnTickets(purchase, true));
                 }
             }
             return false;

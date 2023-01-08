@@ -88,27 +88,24 @@ namespace MailService
             foreach (UniqueId uid in uids.Where(x => x.Id > lastMailId))
             {
                 MimeMessage message = inbox.GetMessage(uid);
-                if (message.Subject.ToLower().Trim() == "rezervacija")
+                try
                 {
-                    try
+
+                    Purchase purchase = await ParsePurchase(message.TextBody, message.From.ToString().Split('<', '>')[1]);
+
+                    var transactionCoordinator = await ServiceFabricClientHelper.GetTransactionCoordinator();
+                    if (await transactionCoordinator.InvokeWithRetryAsync(x => x.Channel.MakePurchaseFromMail(purchase)))
                     {
-
-                        Purchase purchase = await ParsePurchase(message.TextBody, message.From.ToString().Split('<', '>')[1]);
-
-                        var transactionCoordinator = await ServiceFabricClientHelper.GetTransactionCoordinator();
-                        if (await transactionCoordinator.InvokeWithRetryAsync(x => x.Channel.MakePurchaseFromMail(purchase)))
-                        {
-                            var stringPayload = JsonConvert.SerializeObject(purchase);
-                            var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-                            await _httpClient.PostAsync("api/Reservation", httpContent);
-                            lastMailId = uid.Id;
-                        }
-
+                        var stringPayload = JsonConvert.SerializeObject(purchase);
+                        var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                        await _httpClient.PostAsync("api/Reservation", httpContent);
+                        lastMailId = uid.Id;
                     }
-                    catch (Exception)
-                    {
-                        break;
-                    }
+
+                }
+                catch (Exception)
+                {
+                    break;
                 }
             }
 

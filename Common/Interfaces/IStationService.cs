@@ -18,7 +18,7 @@ namespace Common.Interfaces
         [OperationContract]
         Task BuyTickets(Purchase purchase);
         [OperationContract]
-        Task RollbackBuyTickets(Purchase purchase);
+        Task<bool> ReturnTickets(Purchase purchase, bool skipValidation=false);
         [OperationContract]
         Task AddTrip(Trip trip);
         [OperationContract]

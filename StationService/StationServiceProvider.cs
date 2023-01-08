@@ -73,7 +73,7 @@ namespace StationService
         }
         public async Task<List<Trip>> GetTrips(FilterDto filter)
         {
-            List<Trip> result = await GetList(); 
+            List<Trip> result = await GetList();
             result = result.Where(x => x.Depart > System.DateTime.Now).ToList();
             if (filter.Depart != null)
                 result = result.Where(x => x.Depart == filter.Depart).ToList();
@@ -129,21 +129,34 @@ namespace StationService
             return true;
         }
 
-        public async Task RollbackBuyTickets(Purchase purchase)
+        public async Task<bool> ReturnTickets(Purchase purchase, bool skipValidation = false)
         {
+            var trips = (await GetList()).ToDictionary(x => x.Id);
+            if (!skipValidation)
+            {
 
-            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+                foreach (var id in purchase.TripIds)
+                {
+                    if (trips[id].Depart < System.DateTime.Now.AddDays(7))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            var tripsDic = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {
                 for (int i = 0; i < purchase.TripIds.Count; i++)
                 {
                     long tripId = purchase.TripIds[i];
-                    Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
+                    Trip trip = trips[tripId];
                     trip.AvailableTickets += purchase.Quantities[i];
-                    await trips.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
+                    await tripsDic.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
                 }
                 await tx.CommitAsync();
             }
+            return true;
         }
     }
 }
