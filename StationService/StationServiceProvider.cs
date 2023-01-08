@@ -23,8 +23,8 @@ namespace StationService
             var weatherService = await ServiceFabricClientHelper.GetWeatherService();
 
             decimal? temperature = await weatherService.InvokeWithRetryAsync(client => client.Channel.GetTemperature(trip.Destination, trip.Depart));
-            
-            
+
+            trip.Weather = temperature.ToString() + " stepeni";
             var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -32,7 +32,7 @@ namespace StationService
             }
         }
 
-            public async Task BuyTickets(Purchase purchase)
+        public async Task BuyTickets(Purchase purchase)
         {
 
             var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
@@ -42,14 +42,19 @@ namespace StationService
                 {
                     long tripId = purchase.TripIds[i];
                     Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
-                    trip.AvailableTickets -= purchase.Quantities[i]; 
+                    trip.AvailableTickets -= purchase.Quantities[i];
                     await trips.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
                 }
                 await tx.CommitAsync();
             }
         }
 
-        public async Task<List<Trip>> GetTrips(FilterDto filter)
+        public async Task<double> GetTripPrice(long id)
+        {
+            List<Trip> result = await GetList();
+            return result.FirstOrDefault(x => x.Id == id).Price;
+        }
+        private async Task<List<Trip>> GetList()
         {
             List<Trip> result = new List<Trip>();
             using (var tx = this.StateManager.CreateTransaction())
@@ -64,6 +69,11 @@ namespace StationService
                     }
                 }
             }
+            return result;
+        }
+        public async Task<List<Trip>> GetTrips(FilterDto filter)
+        {
+            List<Trip> result = await GetList(); 
             result = result.Where(x => x.Depart > System.DateTime.Now).ToList();
             if (filter.Depart != null)
                 result = result.Where(x => x.Depart == filter.Depart).ToList();
@@ -92,7 +102,7 @@ namespace StationService
             switch (type)
             {
                 case SortType.Depart:
-                    return result.OrderBy(x => x.Depart).ToList(); 
+                    return result.OrderBy(x => x.Depart).ToList();
                 case SortType.DepartDESC:
                     return result.OrderByDescending(x => x.Depart).ToList();
                 case SortType.COUNTAVAILABLE:

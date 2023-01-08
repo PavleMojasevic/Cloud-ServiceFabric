@@ -40,6 +40,7 @@
     <ProjectReference Include="..\Client\Client.csproj">
       <ServiceLaunchUrl>http://localhost:{ServicePort}/</ServiceLaunchUrl>
     </ProjectReference>
+    <ProjectReference Include="..\MailService\MailService.csproj" />
     <ProjectReference Include="..\StationService\StationService.csproj" />
     <ProjectReference Include="..\TransactionCoordinator\TransactionCoordinator.csproj" />
     <ProjectReference Include="..\UserService\UserService.csproj" />

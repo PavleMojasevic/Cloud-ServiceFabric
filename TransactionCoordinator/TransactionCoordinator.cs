@@ -1,15 +1,24 @@
 ﻿using Common.Interfaces;
+using Common.Models;
+using MailKit.Net.Imap;
+using MailKit.Search;
+using MailKit.Security;
+using MailKit;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Communication.Wcf;
 using Microsoft.ServiceFabric.Services.Communication.Wcf.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace TransactionCoordinator
 {
@@ -35,7 +44,7 @@ namespace TransactionCoordinator
                 new ServiceReplicaListener(context => this.CreateWcfCommunication(context),"TransactionCoordinator")
 
                 };
-        } 
+        }
 
 
         private ICommunicationListener CreateWcfCommunication(StatefulServiceContext context)
@@ -76,7 +85,7 @@ namespace TransactionCoordinator
 
                     ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
                         result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
+                     
                     await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
 
                     // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
@@ -87,5 +96,6 @@ namespace TransactionCoordinator
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
+         
     }
 }

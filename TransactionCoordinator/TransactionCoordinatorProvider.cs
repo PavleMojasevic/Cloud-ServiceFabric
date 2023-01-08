@@ -33,23 +33,22 @@ namespace TransactionCoordinator
         }
 
         public async Task<bool> MakePurchase(User user, Purchase purchase)
-        { 
+        {
             var bankService = await ServiceFabricClientHelper.GetBankService();
             var stationService = await ServiceFabricClientHelper.GetStationService();
             var userService = await ServiceFabricClientHelper.GetUserService();
-            purchase.Id=Guid.NewGuid();
+            purchase.Id = Guid.NewGuid();
             decimal bankResponse = await bankService.InvokeWithRetryAsync(client => client.Channel.GetAvailableFunds(user.BankAccountNumber));
             bool stationResponse = await stationService.InvokeWithRetryAsync(client => client.Channel.IsAvailable(purchase));
-            
-            if(stationResponse && bankResponse>=purchase.Amounts.Sum())
+
+            if (stationResponse && bankResponse >= purchase.Amounts.Sum())
             {
                 try
                 {
                     await bankService.InvokeWithRetryAsync(client => client.Channel.Pay(user.BankAccountNumber, purchase.Amounts.Sum()));
                     await stationService.InvokeWithRetryAsync(client => client.Channel.BuyTickets(purchase));
                     await userService.InvokeWithRetryAsync(client => client.Channel.AddPurchase(user.Username, purchase));
-                    return true;
-                    //TODO dodati recnike
+                    return true; 
                 }
                 catch (Exception e)
                 {
@@ -62,18 +61,18 @@ namespace TransactionCoordinator
 
         public async Task<bool> Registration(User user, string accountNumber)
         {
-            var bankService =await ServiceFabricClientHelper.GetBankService(); 
-            var userService =await ServiceFabricClientHelper.GetUserService();
+            var bankService = await ServiceFabricClientHelper.GetBankService();
+            var userService = await ServiceFabricClientHelper.GetUserService();
             user.BankAccountNumber = accountNumber;
-            bool bankResponse=await bankService.InvokeWithRetryAsync(client => client.Channel.PrepareAdd(accountNumber));
-            bool userResponse=await userService.InvokeWithRetryAsync(client => client.Channel.PrepareRegistration(user.Username));
+            bool bankResponse = await bankService.InvokeWithRetryAsync(client => client.Channel.PrepareAdd(accountNumber));
+            bool userResponse = await userService.InvokeWithRetryAsync(client => client.Channel.PrepareRegistration(user.Username));
 
-            if(bankResponse && userResponse)
+            if (bankResponse && userResponse)
             {
                 try
                 {
                     await bankService.InvokeWithRetryAsync(client => client.Channel.AddAccount(accountNumber, user.Username));
-                    await userService.InvokeWithRetryAsync(client => client.Channel.Registration(user)); 
+                    await userService.InvokeWithRetryAsync(client => client.Channel.Registration(user));
                     return true;
                     //TODO dodati recnike
                 }
@@ -84,6 +83,24 @@ namespace TransactionCoordinator
                 }
             }
             return false;
+        }
+
+        public async Task<bool> MakePurchaseFromMail(Purchase purchase)
+        {
+
+            var userService = await ServiceFabricClientHelper.GetUserService();
+            var stationService = await ServiceFabricClientHelper.GetStationService();
+            User user = await userService.InvokeWithRetryAsync(client => client.Channel.GetUserByEmail(purchase.Username));
+            if (user == null)
+                return false;
+            purchase.Username = user.Username;
+            for (int i = 0; i < purchase.TripIds.Count; i++)
+            {
+                long id = purchase.TripIds[i];
+                double price = await stationService.InvokeWithRetryAsync(client => client.Channel.GetTripPrice(id));
+                purchase.Amounts.Add((decimal)price * purchase.Quantities[i]);
+            }
+            return await MakePurchase(user, purchase);
         }
     }
 }

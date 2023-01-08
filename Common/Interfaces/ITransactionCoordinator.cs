@@ -16,6 +16,8 @@ namespace Common.Interfaces
         [OperationContract]
         Task<bool> MakePurchase(User user, Purchase purchase);
         [OperationContract]
+        Task<bool> MakePurchaseFromMail( Purchase purchase);
+        [OperationContract]
         Task<bool> Registration(User user, string accountNumber);
     }
 }

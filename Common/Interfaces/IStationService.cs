@@ -21,5 +21,7 @@ namespace Common.Interfaces
         Task RollbackBuyTickets(Purchase purchase);
         [OperationContract]
         Task AddTrip(Trip trip);
+        [OperationContract]
+        Task<double> GetTripPrice(long id);
     }
 }

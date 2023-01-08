@@ -86,11 +86,30 @@ namespace Common
             ServicePartitionClient<WcfCommunicationClient<IWeatherService>> servicePartitionClient = new
                 ServicePartitionClient<WcfCommunicationClient<IWeatherService>>(
                     new WcfCommunicationClientFactory<IWeatherService>(clientBinding: binding),
-                    new Uri("fabric:/CloudProjekat/Stateless1"),
+                    new Uri("fabric:/CloudProjekat/WeatherAPI"),
                     new ServicePartitionKey(0));
              
             return servicePartitionClient;
 
+
+        }
+
+        public static async Task<ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>>> GetTransactionCoordinator()
+        {
+            FabricClient fabricClient = new FabricClient();
+
+            int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/TransactionCoordinator"))).Count;
+            var binding = WcfUtility.CreateTcpClientBinding();
+
+            int index = 0;
+            //TODO: for
+            ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>> servicePartitionClient = new
+                ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>>(
+                    new WcfCommunicationClientFactory<ITransactionCoordinator>(clientBinding: binding),
+                    new Uri("fabric:/CloudProjekat/TransactionCoordinator"),
+                    new ServicePartitionKey(0));
+
+            return servicePartitionClient;
 
         }
     }

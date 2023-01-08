@@ -9,8 +9,12 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Mail;
+using System.ServiceModel.MsmqIntegration;
+using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Threading.Tasks;  
 
 namespace StationService
 {
@@ -71,16 +75,17 @@ namespace StationService
             using (var tx = this.StateManager.CreateTransaction())
             {
                 for (int i = 0; i < 5; i++)
-                { 
+                {
                     Trip trip = new Trip
                     {
                         Id = i + 1,
                         AvailableTickets = 10,
-                        Depart = DateTime.Now.AddDays(10+i),
-                        Price = i*100+1000,
+                        Depart = DateTime.Now.AddDays(10 + i),
+                        Price = i * 100 + 1000,
                         Type = TripType.Voz,
                         TotalTickets = 10,
-                        Destination="Pariz"
+                        Destination = "Pariz",
+                        Weather = (20 + i).ToString()+" stepeni"
                     }; 
                     bool result=await trips.TryAddAsync(tx, trip.Id,trip);
                 }
@@ -92,7 +97,7 @@ namespace StationService
 
                 using (var tx = this.StateManager.CreateTransaction())
                 {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
+                    var result = await myDictionary.TryGetValueAsync(tx, "Counter"); 
 
                     ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
                         result.HasValue ? result.Value.ToString() : "Value does not exist.");
@@ -107,5 +112,9 @@ namespace StationService
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
+
+        HttpClient HttpClient = new HttpClient { BaseAddress = new Uri("http://localhost:8859") };
+
+        
     }
 }

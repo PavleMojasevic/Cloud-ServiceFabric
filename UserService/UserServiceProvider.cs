@@ -3,6 +3,7 @@ using Common.Models;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace UserService
@@ -94,6 +95,25 @@ namespace UserService
                 return user.Purchases;
             } 
         }
-        
+
+        public async Task<User> GetUserByEmail(string username)
+        {
+
+            List<User> result = new List<User>();
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
+                IAsyncEnumerable<KeyValuePair<string, User>> enumerable = await users.CreateEnumerableAsync(tx);
+                using (IAsyncEnumerator<KeyValuePair<string, User>> e = enumerable.GetAsyncEnumerator())
+                {
+                    while (await e.MoveNextAsync(System.Threading.CancellationToken.None).ConfigureAwait(false))
+                    {
+                        result.Add(e.Current.Value);
+                    }
+                }
+            }
+            return result.FirstOrDefault(x=>x.Email== username); 
+        }
+
     }
 }

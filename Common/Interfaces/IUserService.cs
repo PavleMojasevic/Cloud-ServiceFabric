@@ -25,5 +25,7 @@ namespace Common.Interfaces
         Task<List<Purchase>> GetPurchases(string username);
         [OperationContract]
         Task<User> RemovePurchase(string username, Purchase purchase);
+        [OperationContract]
+        Task<User> GetUserByEmail(string username); 
     }
 }

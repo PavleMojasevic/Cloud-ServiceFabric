@@ -27,6 +27,10 @@
     <ConfigOverrides />
   </ServiceManifestImport>
   <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="MailServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+  </ServiceManifestImport>
+  <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="ClientPkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
     <EnvironmentOverrides CodePackageRef="code">
