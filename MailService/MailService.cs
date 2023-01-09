@@ -63,8 +63,7 @@ namespace MailService
             }
         }
         HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:8859") };
-
-        uint lastMailId = 0;
+         
         private async Task GetMails()
         {
 
@@ -82,24 +81,27 @@ namespace MailService
 
 
             IMailFolder inbox = client.Inbox;
-            inbox.Open(FolderAccess.ReadOnly);
-            IList<UniqueId> uids = inbox.Search(SearchQuery.SubjectContains("Rezervacija"));
-
-            foreach (UniqueId uid in uids.Where(x => x.Id > lastMailId))
+            inbox.Open(FolderAccess.ReadWrite);
+            IList<UniqueId> uids = inbox.Search(SearchQuery.NotFlags(MessageFlags.Answered));
+            foreach (UniqueId uid in uids)
             {
                 MimeMessage message = inbox.GetMessage(uid);
                 try
                 {
-
-                    Purchase purchase = await ParsePurchase(message.TextBody, message.From.ToString().Split('<', '>')[1]);
-
-                    var transactionCoordinator = await ServiceFabricClientHelper.GetTransactionCoordinator();
-                    if (await transactionCoordinator.InvokeWithRetryAsync(x => x.Channel.MakePurchaseFromMail(purchase)))
+                    if (message.Subject.ToLower().Contains("rezervacija"))
                     {
-                        var stringPayload = JsonConvert.SerializeObject(purchase);
-                        var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
-                        await _httpClient.PostAsync("api/Reservation", httpContent);
-                        lastMailId = uid.Id;
+
+                        Purchase purchase = await ParsePurchase(message.TextBody, message.From.ToString().Split('<', '>')[1]);
+
+                        var transactionCoordinator = await ServiceFabricClientHelper.GetTransactionCoordinator();
+                        if (await transactionCoordinator.InvokeWithRetryAsync(x => x.Channel.MakePurchaseFromMail(purchase)))
+                        {
+                            var stringPayload = JsonConvert.SerializeObject(purchase);
+                            var httpContent = new StringContent(stringPayload, Encoding.UTF8, "application/json");
+                            await _httpClient.PostAsync("api/Reservation", httpContent);
+                              
+                        }
+                        await inbox.SetFlagsAsync(uid, MessageFlags.Answered, true);
                     }
 
                 }
@@ -108,7 +110,7 @@ namespace MailService
                     break;
                 }
             }
-
+            inbox.Close();
         }
 
         private async Task<Purchase> ParsePurchase(string content, string email)

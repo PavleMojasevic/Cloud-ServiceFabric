@@ -14,19 +14,19 @@ namespace Client.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index(FilterDto filter, string message, bool localData=false)
+        public async Task<IActionResult> Index(FilterDto filter, string message, bool localData = false)
         {
-            if(localData)
+            if (localData)
             {
 
-                ViewBag.List = TempStorage.Trips.ToDictionary(x => x.Id);
+                ViewBag.List = TempStorage.Trips.Where(x => x.Depart > DateTime.Now).ToDictionary(x => x.Id);
             }
             else
             {
                 var proxy = WcfHelper.GetStationService();
                 Dictionary<long, Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x => x.Id);
                 ViewBag.List = list;
-                TempStorage.Trips = list.Values.ToList(); 
+                TempStorage.Trips = list.Values.ToList();
             }
             Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
             ViewData["Purchase"] = purchase;
@@ -41,25 +41,25 @@ namespace Client.Controllers
         {
             return RedirectToAction("Index", "Home", new { localData = true });
         }
-        public async Task<IActionResult> Purchases(string message, bool localData=false)
+        public async Task<IActionResult> Purchases(string message, bool localData = false)
         {
             User user = HttpContext.Session.GetObjectFromSession<User>("user");
             if (user == null)
                 return RedirectToAction("Index", "Login");
             if (localData)
-            { 
+            {
                 ViewBag.List = TempStorage.Purchases[user.Username];
             }
             else
-            {  
+            {
                 var proxy = WcfHelper.GetUserService();
-                List<Purchase> list = await proxy.GetPurchases(user.Username); 
+                List<Purchase> list = await proxy.GetPurchases(user.Username);
                 TempStorage.Purchases[user.Username] = list;
                 ViewBag.List = list;
             }
             ViewBag.Message = message;
-            ViewData["Title"] = "Moje kupovine"; 
-            
+            ViewData["Title"] = "Moje kupovine";
+
             ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
 
             return View();
@@ -70,7 +70,7 @@ namespace Client.Controllers
         }
 
         public async Task<IActionResult> AddTrip(string message)
-        { 
+        {
             ViewBag.Message = message;
             ViewData["Title"] = "Dodavanje putovanja";
             ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
@@ -83,9 +83,9 @@ namespace Client.Controllers
                 return RedirectToAction("Index", "Login");
             var proxy = WcfHelper.GetTransactionCoordinator();
             string message = "Kupovina se ne može otkazati";
-            if(!await proxy.CancelPurchase(user, Guid.Parse(purchaseId)))
-            { 
-                return RedirectToAction("Purchases", "Home", new {message= message });
+            if (!await proxy.CancelPurchase(user, Guid.Parse(purchaseId)))
+            {
+                return RedirectToAction("Purchases", "Home", new { message = message });
             }
             return RedirectToAction("Purchases", "Home");
         }
@@ -118,7 +118,7 @@ namespace Client.Controllers
         public async Task<IActionResult> RemoveTrip(int index)
         {
             Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
-            if(purchase.Quantities.Count==1)
+            if (purchase.Quantities.Count == 1)
             {
                 HttpContext.Session.Remove("purchase");
                 return RedirectToAction("Index", "Home");
@@ -145,7 +145,17 @@ namespace Client.Controllers
         }
 
 
+        public async Task<IActionResult> History(string message, SortType sortType = SortType.Depart)
+        {
+            var proxy = WcfHelper.GetStationService();
+            Dictionary<long, Trip> list = (await proxy.GetTripsHistory(sortType)).ToDictionary(x => x.Id);
+            ViewBag.List = list;
 
+            ViewBag.sortType = sortType;
+            ViewData["Title"] = "Istorija putovanja";
+            ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
+            return View();
 
+        }
     }
 }

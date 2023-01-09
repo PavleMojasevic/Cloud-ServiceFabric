@@ -25,8 +25,9 @@ namespace TransactionCoordinator
             var stationService = await ServiceFabricClientHelper.GetStationService();
             var userService = await ServiceFabricClientHelper.GetUserService();
 
-            Purchase purchase = user.Purchases.First(x => x.Id == purchaseId);
-
+            Purchase purchase = user.Purchases.FirstOrDefault(x => x.Id == purchaseId);
+            if (purchase == null)
+                return false;
             if (await stationService.InvokeWithRetryAsync(client => client.Channel.ReturnTickets(purchase)))
             { 
                 await userService.InvokeWithRetryAsync(client => client.Channel.RemovePurchase(user.Username, purchase));

@@ -1,0 +1,48 @@
+﻿@using Common.Models
+@using System.Linq
+@using System.Collections.Generic
+<div class="container"> 
+    <p>@ViewBag.Message</p>
+    <form action="~/Home/History" style="margin-bottom: 30px">
+        <div class="form-group">
+            <label>Sortiranje po</label>
+            <select name="Type" type="text" name="Destination" class="form-control" value="@ViewBag.sortType">
+                <option value="0">Datumu polaska rastuče</option>
+                <option value="1">Datumu polaska opadajuće</option>
+                <option value="2">Broju preostalih karata rastuće</option>
+                <option value="3">Broju preostalih karata opadajuće</option>
+                
+            </select>
+        </div> 
+        <button class="btn btn-primary" type="submit">Sortiraj</button>
+    </form> 
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Tip prevoza</th>
+                <th scope="col">Odredište</th>
+                <th scope="col">Temperatura</th>
+                <th scope="col">Cena</th>
+                <th scope="col">Datum polaska</th>
+                <th scope="col">Datum povratka</th>
+                <th scope="col">Broj neprodatih</th> 
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Trip trip in ViewBag.List.Values)
+            {
+                <tr>
+                    <td>@trip.Id</td>
+                    <td>@trip.Type</td>
+                    <td>@trip.Destination</td>
+                    <td>@trip.Weather</td>
+                    <td>@trip.Price</td>
+                    <td>@trip.Depart</td>
+                    <td>@trip.Return</td>
+                    <td>@(trip.TotalTickets- trip.AvailableTickets)</td> 
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>   
