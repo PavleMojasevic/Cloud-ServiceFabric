@@ -4,6 +4,26 @@
 <div class="container">
     <h1>Kupovina karata</h1>
     <p>@ViewBag.Message</p>
+    <form action="~/Home/Index" style="margin-bottom: 30px">
+        <div class="form-group">
+            <label>Tip</label>
+            <select name="Type" type="text" name="Destination" class="form-control" value="@ViewBag.Type">
+                <option value="0">Avion</option>
+                <option value="1">Autobus</option>
+                <option value="2">Voz</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Datum polaska</label>
+            <input type="date" name="Depart" value="@ViewBag.Depart" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Broj dostupnih karata</label>
+            <input type="text" name="Quantity" value="@ViewBag.Quantity" class="form-control">
+        </div>
+        <button class="btn btn-primary" type="submit">Filtriraj</button>
+    </form>
+    <button class="btn btn-primary" onclick="Refresh()">Osveži</button>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -80,6 +100,10 @@
     }
     function Remove(id) {
         window.location = ('/Home/RemoveTrip?tripId=' + id);
+
+    }
+    function Refresh() {
+        window.location = ('/Home/RefreshTrips');
 
     }
 </script>

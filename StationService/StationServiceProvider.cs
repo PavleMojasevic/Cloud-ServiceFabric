@@ -76,7 +76,7 @@ namespace StationService
             List<Trip> result = await GetList();
             result = result.Where(x => x.Depart > System.DateTime.Now).ToList();
             if (filter.Depart != null)
-                result = result.Where(x => x.Depart == filter.Depart).ToList();
+                result = result.Where(x => x.Depart.ToString("yyyy-MM-dd") == filter.Depart?.ToString("yyyy-MM-dd")).ToList();
             if (filter.Quantity != null)
                 result = result.Where(x => x.AvailableTickets == filter.Quantity).ToList();
             if (filter.Type != null)

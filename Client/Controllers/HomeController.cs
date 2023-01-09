@@ -14,33 +14,61 @@ namespace Client.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index(FilterDto filter, string message)
+        public async Task<IActionResult> Index(FilterDto filter, string message, bool localData=false)
         {
-            var proxy = WcfHelper.GetStationService();
-            Dictionary<long, Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x => x.Id);
-            ViewBag.List = list;
+            if(localData)
+            {
+
+                ViewBag.List = TempStorage.Trips.ToDictionary(x => x.Id);
+            }
+            else
+            {
+                var proxy = WcfHelper.GetStationService();
+                Dictionary<long, Trip> list = (await proxy.GetTrips(filter)).ToDictionary(x => x.Id);
+                ViewBag.List = list;
+                TempStorage.Trips = list.Values.ToList(); 
+            }
             Purchase purchase = HttpContext.Session.GetObjectFromSession<Purchase>("purchase");
             ViewData["Purchase"] = purchase;
-            ViewBag.Message = message;
+            ViewBag.Quantity = filter.Quantity;
+            ViewBag.Depart = filter.Depart;
+            ViewBag.Type = filter.Type;
             ViewData["Title"] = "Početna strana";
             ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
             return View();
         }
-        public async Task<IActionResult> Purchases(string message)
+        public async Task<IActionResult> RefreshTrips()
+        {
+            return RedirectToAction("Index", "Home", new { localData = true });
+        }
+        public async Task<IActionResult> Purchases(string message, bool localData=false)
         {
             User user = HttpContext.Session.GetObjectFromSession<User>("user");
             if (user == null)
                 return RedirectToAction("Index", "Login");
-            var proxy = WcfHelper.GetUserService();
-            List<Purchase> list = await proxy.GetPurchases(user.Username);
-            ViewBag.List = list;
+            if (localData)
+            { 
+                ViewBag.List = TempStorage.Purchases[user.Username];
+            }
+            else
+            {  
+                var proxy = WcfHelper.GetUserService();
+                List<Purchase> list = await proxy.GetPurchases(user.Username); 
+                TempStorage.Purchases[user.Username] = list;
+                ViewBag.List = list;
+            }
             ViewBag.Message = message;
-            ViewData["Title"] = "Istorija kupovina"; 
+            ViewData["Title"] = "Moje kupovine"; 
             
             ViewBag.User = HttpContext.Session.GetObjectFromSession<User>("user");
 
             return View();
         }
+        public async Task<IActionResult> RefreshPurchases()
+        {
+            return RedirectToAction("Purchases", "Home", new { localData = true });
+        }
+
         public async Task<IActionResult> AddTrip(string message)
         { 
             ViewBag.Message = message;
@@ -115,6 +143,7 @@ namespace Client.Controllers
             return RedirectToAction("Index", "Home");
 
         }
+
 
 
 

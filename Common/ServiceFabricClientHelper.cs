@@ -24,18 +24,13 @@ namespace Common
             int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/BankService"))).Count;
             var binding = WcfUtility.CreateTcpClientBinding();
 
-            int index = 0;
-            for (int i = 0; i < partitionNumber; i++)
-            {
-                ServicePartitionClient<WcfCommunicationClient<IBankService>> servicePartitionClient = new
-                ServicePartitionClient<WcfCommunicationClient<IBankService>>(
-                    new WcfCommunicationClientFactory<IBankService>(clientBinding: binding),
-                    new Uri("fabric:/CloudProjekat/BankService"),
-                    new ServicePartitionKey(index % partitionNumber));
-                index++;
-                return servicePartitionClient;
-            }
-            return null;
+
+            ServicePartitionClient<WcfCommunicationClient<IBankService>> servicePartitionClient = new
+            ServicePartitionClient<WcfCommunicationClient<IBankService>>(
+                new WcfCommunicationClientFactory<IBankService>(clientBinding: binding),
+                new Uri("fabric:/CloudProjekat/BankService"),
+                new ServicePartitionKey(0));
+            return servicePartitionClient;
         }
         public static async Task<ServicePartitionClient<WcfCommunicationClient<IUserService>>> GetUserService()
         {
@@ -43,19 +38,13 @@ namespace Common
 
             int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/UserService"))).Count;
             var binding = WcfUtility.CreateTcpClientBinding();
-            int index = 0;
-            for (int i = 0; i < partitionNumber; i++)
-            {
-                ServicePartitionClient<WcfCommunicationClient<IUserService>> servicePartitionClient = new
-                ServicePartitionClient<WcfCommunicationClient<IUserService>>(
-                    new WcfCommunicationClientFactory<IUserService>(clientBinding: binding),
-                    new Uri("fabric:/CloudProjekat/UserService"),
-                    new ServicePartitionKey(index % partitionNumber));
-                index++;
-                return servicePartitionClient;
-            }
 
-            return null;
+            ServicePartitionClient<WcfCommunicationClient<IUserService>> servicePartitionClient = new
+            ServicePartitionClient<WcfCommunicationClient<IUserService>>(
+                new WcfCommunicationClientFactory<IUserService>(clientBinding: binding),
+                new Uri("fabric:/CloudProjekat/UserService"),
+                new ServicePartitionKey(0));
+            return servicePartitionClient;
         }
         public static async Task<ServicePartitionClient<WcfCommunicationClient<IStationService>>> GetStationService()
         {
@@ -64,19 +53,12 @@ namespace Common
             int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/StationService"))).Count;
             var binding = WcfUtility.CreateTcpClientBinding();
 
-            int index = 0;
-            for (int i = 0; i < partitionNumber; i++)
-            {
-
-                ServicePartitionClient<WcfCommunicationClient<IStationService>> servicePartitionClient = new
-                    ServicePartitionClient<WcfCommunicationClient<IStationService>>(
-                        new WcfCommunicationClientFactory<IStationService>(clientBinding: binding),
-                        new Uri("fabric:/CloudProjekat/StationService"),
-                        new ServicePartitionKey(index % partitionNumber));
-                index++;
-                return servicePartitionClient;
-            }
-            return null;
+            ServicePartitionClient<WcfCommunicationClient<IStationService>> servicePartitionClient = new
+                ServicePartitionClient<WcfCommunicationClient<IStationService>>(
+                    new WcfCommunicationClientFactory<IStationService>(clientBinding: binding),
+                    new Uri("fabric:/CloudProjekat/StationService"),
+                    new ServicePartitionKey(0));
+            return servicePartitionClient;
 
         }
         public static async Task<ServicePartitionClient<WcfCommunicationClient<IWeatherService>>> GetWeatherService()
@@ -86,20 +68,14 @@ namespace Common
             int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/WeatherAPI"))).Count;
             var binding = WcfUtility.CreateTcpClientBinding();
 
-            int index = 0;
-            for (int i = 0; i < partitionNumber; i++)
-            {
 
+            ServicePartitionClient<WcfCommunicationClient<IWeatherService>> servicePartitionClient = new
+            ServicePartitionClient<WcfCommunicationClient<IWeatherService>>(
+                new WcfCommunicationClientFactory<IWeatherService>(clientBinding: binding),
+                new Uri("fabric:/CloudProjekat/WeatherAPI"),
+                    new ServicePartitionKey(0));
 
-                ServicePartitionClient<WcfCommunicationClient<IWeatherService>> servicePartitionClient = new
-                ServicePartitionClient<WcfCommunicationClient<IWeatherService>>(
-                    new WcfCommunicationClientFactory<IWeatherService>(clientBinding: binding),
-                    new Uri("fabric:/CloudProjekat/WeatherAPI"),
-                        new ServicePartitionKey(index % partitionNumber));
-                index++;
-                return servicePartitionClient;
-            }
-            return null;
+            return servicePartitionClient;
 
         }
 
@@ -110,18 +86,12 @@ namespace Common
             int partitionNumber = (await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/CloudProjekat/TransactionCoordinator"))).Count;
             var binding = WcfUtility.CreateTcpClientBinding();
 
-            int index = 0;
-            for (int i = 0; i < partitionNumber; i++)
-            {
-                ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>> servicePartitionClient = new
-                ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>>(
-                    new WcfCommunicationClientFactory<ITransactionCoordinator>(clientBinding: binding),
-                    new Uri("fabric:/CloudProjekat/TransactionCoordinator"),
-                        new ServicePartitionKey(index % partitionNumber));
-                index++;
-                return servicePartitionClient;
-            }
-            return null;
+            ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>> servicePartitionClient = new
+            ServicePartitionClient<WcfCommunicationClient<ITransactionCoordinator>>(
+                new WcfCommunicationClientFactory<ITransactionCoordinator>(clientBinding: binding),
+                new Uri("fabric:/CloudProjekat/TransactionCoordinator"),
+                    new ServicePartitionKey(0));
+            return servicePartitionClient;
 
         }
     }
