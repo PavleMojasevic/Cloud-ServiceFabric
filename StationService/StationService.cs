@@ -14,7 +14,7 @@ using System.Net.Mail;
 using System.ServiceModel.MsmqIntegration;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;  
+using System.Threading.Tasks;
 
 namespace StationService
 {
@@ -34,7 +34,7 @@ namespace StationService
         /// For more information on service communication, see https://aka.ms/servicefabricservicecommunication
         /// </remarks>
         /// <returns>A collection of listeners.</returns>
-       protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
+        protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
             return new[]{
                 new ServiceReplicaListener(context => this.CreateWcfCommunication(context),"StationService")
@@ -57,7 +57,7 @@ namespace StationService
                 wcfServiceObject: new StationServiceProvider(this.StateManager),
                 listenerBinding: WcfUtility.CreateTcpListenerBinding(),
                 address: new System.ServiceModel.EndpointAddress(uri));
-            return listener;    
+            return listener;
         }
 
         /// <summary>
@@ -66,28 +66,31 @@ namespace StationService
         /// </summary>
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
-        {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
+        { 
 
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
             var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            StationRepository repository = new StationRepository(StateManager);
+
+            List<TripDB> tripsDb = repository.RetrieveAll();
+
             using (var tx = this.StateManager.CreateTransaction())
             {
-                for (int i = 0; i < 5; i++)
+                foreach (var tripdb in tripsDb)
                 {
                     Trip trip = new Trip
                     {
-                        Id = i + 1,
-                        AvailableTickets = 10,
-                        Depart = DateTime.Now.AddDays(10 + i),
-                        Price = i * 100 + 1000,
-                        Type = TripType.Voz,
-                        TotalTickets = 10,
-                        Destination = "Pariz",
-                        Weather = (20 + i).ToString()+" stepeni"
-                    }; 
-                    bool result=await trips.TryAddAsync(tx, trip.Id,trip);
+                        AvailableTickets = tripdb.AvailableTickets,
+                        Depart = tripdb.Depart,
+                        Destination = tripdb.Destination,
+                        Price = tripdb.Price,
+                        Return = tripdb.Return,
+                        Id = tripdb.Id,
+                        TotalTickets = tripdb.TotalTickets,
+                        Type = tripdb.Type,
+                        Weather = tripdb.Weather
+                    };
+                    await trips.TryAddAsync(tx, trip.Id, trip);
                 }
                 tx.CommitAsync();
             }
@@ -97,24 +100,21 @@ namespace StationService
 
                 using (var tx = this.StateManager.CreateTransaction())
                 {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter"); 
+                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
 
                     ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
                         result.HasValue ? result.Value.ToString() : "Value does not exist.");
 
                     await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
 
-                    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                    // discarded, and nothing is saved to the secondary replicas.
                     await tx.CommitAsync();
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await repository.SyncTable();
+                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
             }
         }
+         
 
-        HttpClient HttpClient = new HttpClient { BaseAddress = new Uri("http://localhost:8859") };
-
-        
     }
 }

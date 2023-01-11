@@ -15,7 +15,7 @@ namespace BankService
     public class BankRepository : Repository<BankAccountDB>
     {
         private IReliableStateManager StateManager;
-        public BankRepository(IReliableStateManager stateManager, string connString) : base("BankAccount", connString)
+        public BankRepository(IReliableStateManager stateManager) : base("BankAccount")
         {
             this.StateManager = stateManager;
         }
@@ -35,7 +35,7 @@ namespace BankService
             return list;
         }
 
-        public override async Task SyncService()
+        public override async Task SyncTable()
         {
             var accountsDisc = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
 

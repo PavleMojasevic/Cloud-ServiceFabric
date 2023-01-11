@@ -16,7 +16,7 @@ namespace Common
         protected CloudStorageAccount _storageAccount;
         protected CloudTable _table;
         protected string _tableName;
-        public Repository(string tableName, string connString)
+        public Repository(string tableName, string connString="UseDevelopmentStorage=true")
         {
             _tableName = tableName;
             
@@ -36,6 +36,6 @@ namespace Common
             _table.Execute(insertOperation);
 
         }
-        public abstract Task SyncService();
+        public abstract Task SyncTable();
     }
 }

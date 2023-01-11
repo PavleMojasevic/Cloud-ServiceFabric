@@ -58,7 +58,7 @@ namespace BankService
 
             var accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
 
-            BankRepository bankRepository = new BankRepository(StateManager, "UseDevelopmentStorage=true");
+            BankRepository bankRepository = new BankRepository(StateManager);
             using (var tx = this.StateManager.CreateTransaction())
             {
                 foreach (BankAccountDB bank in bankRepository.RetrieveAll())
@@ -77,8 +77,8 @@ namespace BankService
                     await tx.CommitAsync();
                 }
 
-                await bankRepository.SyncService();
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await bankRepository.SyncTable();
+                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
             }
         }
     }
