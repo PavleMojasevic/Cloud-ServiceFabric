@@ -123,7 +123,7 @@ namespace MailService
             foreach (var row in parts)
             {
                 string[] item = row.Split(';');
-                purchase.TripIds.Add(Convert.ToInt64(item[0]));
+                purchase.TripIds.Add(item[0]);
                 purchase.Quantities.Add(Convert.ToInt32(item[1]));
             }
             return purchase;

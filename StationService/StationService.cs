@@ -69,7 +69,7 @@ namespace StationService
         { 
 
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
-            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
             StationRepository repository = new StationRepository(StateManager);
 
             List<TripDB> tripsDb = repository.RetrieveAll();

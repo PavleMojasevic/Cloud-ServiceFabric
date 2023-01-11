@@ -19,22 +19,17 @@ namespace BankService
         {
             this.StateManager = stateManager;
         }
+
         public override List<BankAccountDB> RetrieveAll()
         {
-            IQueryable<BankAccountDB> results = from g in _table.CreateQuery<BankAccountDB>()
-                                                where g.PartitionKey == _tableName
-                                                select g;
-            List<BankAccountDB> list = results.Select(s =>
-            new BankAccountDB
             {
-                Username = s.Username,
-                AccountNumber = s.AccountNumber,
-                AvailableFunds = s.AvailableFunds,
-                RowKey = s.RowKey
-            }).ToList();
-            return list;
-        }
 
+                IQueryable<BankAccountDB> results = from g in _table.CreateQuery<BankAccountDB>()
+                                             where g.PartitionKey == _tableName
+                                             select g;
+                return results.ToList();
+            }
+        }
         public override async Task SyncTable()
         {
             var accountsDisc = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");

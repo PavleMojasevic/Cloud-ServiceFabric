@@ -17,12 +17,12 @@ namespace Common.Interfaces
         [OperationContract]
         Task RemoveAccount(string accountNumber);
         [OperationContract]
-        Task<decimal> GetAvailableFunds(string accountNumber);
+        Task<double> GetAvailableFunds(string accountNumber);
         [OperationContract]
-        Task AddFunds(string accountNumber, decimal amount);
+        Task AddFunds(string accountNumber, double amount);
         [OperationContract]
-        Task<bool> Pay(string accountNumber, decimal amount);
+        Task<bool> Pay(string accountNumber, double amount);
         [OperationContract]
-        Task Refund(string bankAccountNumber, decimal amount);
+        Task Refund(string bankAccountNumber, double amount);
     }
 }

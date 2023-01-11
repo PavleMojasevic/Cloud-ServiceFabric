@@ -10,6 +10,6 @@ namespace Common.Interfaces
     public interface IWeatherService
     {
         [OperationContract]
-        Task<decimal?> GetTemperature(string city, DateTime dateTime);
+        Task<string> GetTemperature(string city, DateTime dateTime);
     }
 }

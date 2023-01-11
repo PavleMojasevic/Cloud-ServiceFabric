@@ -22,9 +22,11 @@ namespace StationService
             TotalTickets = trip.TotalTickets;
             AvailableTickets = trip.AvailableTickets;
             Weather = trip.Weather;
+            PartitionKey = "Trip";
+            RowKey = trip.Id.ToString();
         }
 
-        public long Id { get; set; } 
+        public string Id { get; set; } 
         public string Destination { get; set; } 
         public TripType Type { get; set; }
         public double Price { get; set; }

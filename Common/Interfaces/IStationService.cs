@@ -22,7 +22,7 @@ namespace Common.Interfaces
         [OperationContract]
         Task AddTrip(Trip trip);
         [OperationContract]
-        Task<double> GetTripPrice(long id);
+        Task<double> GetTripPrice(string id);
         [OperationContract]
         Task<List<Trip>> GetTripsHistory(SortType type);
     }

@@ -12,7 +12,7 @@ namespace Common.Models
     {
 
         [DataMember]
-        public long Id { get; set; }
+        public string Id { get; set; }
         [DataMember]
         public string Destination { get; set; }
         [DataMember]

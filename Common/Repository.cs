@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace Common
 {
-    public abstract class Repository<T>
+    public abstract class Repository<T> where T : TableEntity
     {
         protected CloudStorageAccount _storageAccount;
         protected CloudTable _table;
@@ -28,12 +28,12 @@ namespace Common
             _table.CreateIfNotExists(); 
 
         }
-        public abstract List<T> RetrieveAll(); 
-         
+        public abstract List<T> RetrieveAll();
+        
         public void AddOrUpdate(T newBankAccount)
         {
             TableOperation insertOperation = TableOperation.InsertOrReplace(newBankAccount as TableEntity);
-            _table.Execute(insertOperation);
+            var result = _table.Execute(insertOperation);
 
         }
         public abstract Task SyncTable();

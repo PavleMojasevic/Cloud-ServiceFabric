@@ -17,7 +17,7 @@ namespace Client.Controllers
             TempStorage.AddPurchase(purchase);   
             for (int i = 0; i < purchase.TripIds.Count; i++)
             {
-                long id = purchase.TripIds[i];
+                string id = purchase.TripIds[i];
                 Trip trip = TempStorage.Trips.FirstOrDefault(x => x.Id == id);
                 if(trip!=null)
                 {

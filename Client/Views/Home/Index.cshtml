@@ -52,10 +52,10 @@
                     <td>@trip.Destination</td>
                     <td>@trip.Weather</td>
                     <td>@trip.Price</td>
-                    <td>@trip.Depart</td>
-                    <td>@trip.Return</td>
+                    <td>@trip.Depart.ToString("dd.MM.yyyy")</td>
+                    <td>@trip.Return?.ToString("dd.MM.yyyy")</td> 
                     <td>@trip.AvailableTickets</td>
-                    <td><button class="btn btn-success" onclick="Add(@trip.Id, @trip.Price)">Dodaj</button></td>
+                    <td><button class="btn btn-success" onclick="Add('@trip.Id', @trip.Price)">Dodaj</button></td>
                 </tr>
             }
         </tbody>
@@ -78,25 +78,24 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 0; i < (ViewData["Purchase"] as Purchase).TripIds.Count; i++)
+                @for (int i = 0; i < ViewBag.Purchase.TripIds.Count; i++)
                 {
                     <tr>
-                        <td>@((ViewData["Purchase"] as Purchase).TripIds[i])</td>
+                        <td>@(ViewBag.Purchase.TripIds[i])</td>
                         <td>@(ViewBag.List[ViewBag.Purchase.TripIds[i]].Destination)</td>
-                        <td>@((ViewData["Purchase"] as Purchase).Quantities[i])</td>
-                        <td>@((ViewData["Purchase"] as Purchase).Amounts[i]) RSD</td>
+                        <td>@(ViewBag.Purchase.Quantities[i])</td>
+                        <td>@(ViewBag.Purchase.Amounts[i]) RSD</td>
                         <td> <button class="btn btn-danger" onclick="Remove(@i)">Ukloni</button></td>
                     </tr>
                 }
             </tbody>
-        </table>
-        <h3>Ukupno: @((ViewData["Purchase"] as Purchase).Amounts.Sum()) RSD </h3>
+        </table> 
         <button class="btn btn-success" onclick="MakePurchase()">Kupi</button>
     </div>
 }
 <script>
     function Add(tripId, price) {
-        window.location = ('/Home/AddTripPurchase?tripId=' + tripId + "&price=" + price);
+        window.location = ("/Home/AddTripPurchase?tripId=" + tripId + "&price=" + price);
 
     }
     function MakePurchase() {
@@ -104,7 +103,7 @@
 
     }
     function Remove(id) {
-        window.location = ('/Home/RemoveTrip?tripId=' + id);
+        window.location = ("/Home/RemoveTrip?index=" + id+"");
 
     }
     function Refresh() {

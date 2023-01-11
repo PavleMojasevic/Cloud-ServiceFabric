@@ -69,7 +69,26 @@ namespace UserService
 
             var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
             var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
+            UserRepository repository = new UserRepository(StateManager);
 
+            List<UserDB> usersDB = repository.RetrieveAll();
+
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                foreach (var userDB in usersDB)
+                {
+                    User user = new User
+                    { 
+                        Username= userDB.Username,
+                        BankAccountNumber= userDB.BankAccountNumber,
+                        Email= userDB.Email,
+                        Password=userDB.Password,
+                        Purchases = userDB.Purchases
+                    };
+                    await users.TryAddAsync(tx, user.Username, user);
+                }
+                tx.CommitAsync();
+            }
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -87,8 +106,9 @@ namespace UserService
                     // discarded, and nothing is saved to the secondary replicas.
                     await tx.CommitAsync();
                 }
+                await repository.SyncTable();
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
             }
         }
     }

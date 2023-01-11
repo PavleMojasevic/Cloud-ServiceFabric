@@ -3,6 +3,7 @@ using Common.Interfaces;
 using Common.Models;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,27 +21,28 @@ namespace StationService
 
         public async Task AddTrip(Trip trip)
         {
-            var weatherService = await ServiceFabricClientHelper.GetWeatherService();
+            var weatherService = WcfHelper.GetWeatherService();
+            trip.AvailableTickets = trip.TotalTickets;
 
-            decimal? temperature = await weatherService.InvokeWithRetryAsync(client => client.Channel.GetTemperature(trip.Destination, trip.Depart));
-
-            trip.Weather = temperature.ToString() + " stepeni";
-            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            trip.Weather = await weatherService.GetTemperature(trip.Destination, trip.Depart) + " stepeni";
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
+            trip.Id = Guid.NewGuid().ToString();
             using (var tx = this.StateManager.CreateTransaction())
             {
                 bool result = await trips.TryAddAsync(tx, trip.Id, trip);
+                await tx.CommitAsync();
             }
         }
 
         public async Task BuyTickets(Purchase purchase)
         {
 
-            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {
                 for (int i = 0; i < purchase.TripIds.Count; i++)
                 {
-                    long tripId = purchase.TripIds[i];
+                    string tripId = purchase.TripIds[i];
                     Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
                     trip.AvailableTickets -= purchase.Quantities[i];
                     await trips.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);
@@ -49,7 +51,7 @@ namespace StationService
             }
         }
 
-        public async Task<double> GetTripPrice(long id)
+        public async Task<double> GetTripPrice(string id)
         {
             List<Trip> result = await GetList();
             return result.FirstOrDefault(x => x.Id == id).Price;
@@ -59,9 +61,9 @@ namespace StationService
             List<Trip> result = new List<Trip>();
             using (var tx = this.StateManager.CreateTransaction())
             {
-                var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
-                IAsyncEnumerable<KeyValuePair<long, Trip>> enumerable = await trips.CreateEnumerableAsync(tx);
-                using (IAsyncEnumerator<KeyValuePair<long, Trip>> e = enumerable.GetAsyncEnumerator())
+                var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
+                IAsyncEnumerable<KeyValuePair<string, Trip>> enumerable = await trips.CreateEnumerableAsync(tx);
+                using (IAsyncEnumerator<KeyValuePair<string, Trip>> e = enumerable.GetAsyncEnumerator())
                 {
                     while (await e.MoveNextAsync(System.Threading.CancellationToken.None).ConfigureAwait(false))
                     {
@@ -103,12 +105,12 @@ namespace StationService
 
         public async Task<bool> IsAvailable(Purchase purchase)
         {
-            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {
                 for (int i = 0; i < purchase.TripIds.Count; i++)
                 {
-                    long tripId = purchase.TripIds[i];
+                    string tripId = purchase.TripIds[i];
                     Trip trip = (await trips.TryGetValueAsync(tx, tripId, LockMode.Update)).Value;
                     if (trip.AvailableTickets < purchase.Quantities[i])
                         return false;
@@ -132,12 +134,12 @@ namespace StationService
                 }
             }
 
-            var tripsDic = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+            var tripsDic = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
             using (var tx = this.StateManager.CreateTransaction())
             {
                 for (int i = 0; i < purchase.TripIds.Count; i++)
                 {
-                    long tripId = purchase.TripIds[i];
+                    string tripId = purchase.TripIds[i];
                     Trip trip = trips[tripId];
                     trip.AvailableTickets += purchase.Quantities[i];
                     await tripsDic.AddOrUpdateAsync(tx, tripId, trip, (k, v) => v);

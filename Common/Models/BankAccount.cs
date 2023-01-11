@@ -16,6 +16,6 @@ namespace Common.Models
         [DataMember]
         public string AccountNumber { get; set; }
         [DataMember]
-        public decimal AvailableFunds { get; set; }
+        public double AvailableFunds { get; set; }
     }
 }

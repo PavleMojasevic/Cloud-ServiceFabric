@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace WeatherAPI
@@ -19,9 +20,9 @@ namespace WeatherAPI
                 BaseAddress = new Uri("https://api.worldweatheronline.com/premium/v1/weather.ashx")
             };
         }
-        public async Task<decimal?> GetTemperature(string city, DateTime dateTime)
+        public async Task<string> GetTemperature(string city, DateTime dateTime)
         {
-            string parameters = "?p=" + city.Replace(" ", "+");
+            string parameters = "?q=" + city.Replace(" ", "+");
 
             if(dateTime.AddDays(-7)>DateTime.Now)
             {
@@ -33,10 +34,10 @@ namespace WeatherAPI
             if (response.IsSuccessStatusCode)
             {
                 string xml = await response.Content.ReadAsStringAsync();
-                string content = xml.Split(new string[] { "<temp_C>" },1, StringSplitOptions.None)[1];
-                return Convert.ToDecimal(content.Split('<')[0]);
+                string content = Regex.Match(xml, @"<temp_C>(.+)<\/temp_C>").Groups[1].Value;
+                return content;
             }
-            return null;
+            return "";
         }
     }
 }

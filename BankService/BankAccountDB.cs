@@ -8,14 +8,14 @@ namespace BankService
     {
         public string Username { get; set; } 
         public string AccountNumber { get; set; } 
-        public decimal AvailableFunds { get; set; }
+        public double AvailableFunds { get; set; }
         public BankAccountDB(BankAccount bankAccount)
         {
             Username=bankAccount.Username;
             AccountNumber=bankAccount.AccountNumber;
             AvailableFunds=bankAccount.AvailableFunds;
             PartitionKey = "BankAccount";
-            RowKey = bankAccount.Username;
+            RowKey = bankAccount.AccountNumber;
         }
 
         public BankAccountDB()

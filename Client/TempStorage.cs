@@ -18,7 +18,7 @@ namespace Client
             Purchases[purchase.Username].Add(purchase);
             for (int i = 0; i < purchase.TripIds.Count; i++)
             {
-                long id = purchase.TripIds[i];
+                string id = purchase.TripIds[i];
                 var trip = Trips.Where(x => x.Id == id).FirstOrDefault();
                 if(trip!=null) 
                 {

@@ -58,7 +58,7 @@ namespace BankService
             }
         }
 
-        public async Task<bool> Pay(string accountNumber, decimal amount)
+        public async Task<bool> Pay(string accountNumber, double amount)
         {
             IReliableDictionary<string, BankAccount> accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
@@ -73,7 +73,7 @@ namespace BankService
             }
             return true;
         }  
-        public async Task Refund(string accountNumber, decimal amount)
+        public async Task Refund(string accountNumber, double amount)
         {
             IReliableDictionary<string, BankAccount> accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
@@ -85,7 +85,7 @@ namespace BankService
 
             } 
         }
-        public async Task AddFunds(string accountNumber, decimal amount)
+        public async Task AddFunds(string accountNumber, double amount)
         {
             IReliableDictionary<string, BankAccount> accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
             using (var tx = this.StateManager.CreateTransaction())
@@ -98,12 +98,13 @@ namespace BankService
             } 
         }
 
-        public async Task<decimal> GetAvailableFunds(string accountNumber)
+        public async Task<double> GetAvailableFunds(string accountNumber)
         {
             using (var tx = this.StateManager.CreateTransaction())
             {
                 var accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
-                return (await accounts.TryGetValueAsync(tx, accountNumber)).Value.AvailableFunds;
+                var acc = (await accounts.TryGetValueAsync(tx, accountNumber)).Value;
+                return acc.AvailableFunds;
             }
         }
     }

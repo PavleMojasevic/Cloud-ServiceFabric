@@ -17,10 +17,10 @@ namespace Common.Models
         [DataMember]
         public DateTime Date{ get; set; }
         [DataMember]
-        public List<long> TripIds { get; set; } = new List<long>();
+        public List<string> TripIds { get; set; } = new List<string>();
         [DataMember]
         public List<int> Quantities { get; set; } = new List<int>();
         [DataMember]
-        public List<decimal> Amounts { get; set; } = new List<decimal>();
+        public List<double> Amounts { get; set; } = new List<double>();
     }
 }

@@ -1,13 +1,17 @@
 ﻿using Common.Interfaces;
 using System.ServiceModel;
 
-namespace Client
+namespace Common
 {
     public static class WcfHelper
     {
         public static IUserService GetUserService()
         { 
             return GetService<IUserService>("UserService", 53852);
+        }
+        public static IWeatherService GetWeatherService()
+        { 
+            return GetService<IWeatherService>("WeatherService", 53854);
         }
         public static ITransactionCoordinator GetTransactionCoordinator()
         { 

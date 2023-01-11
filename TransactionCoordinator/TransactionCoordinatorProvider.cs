@@ -43,7 +43,7 @@ namespace TransactionCoordinator
             var stationService = await ServiceFabricClientHelper.GetStationService();
             var userService = await ServiceFabricClientHelper.GetUserService();
             purchase.Id = Guid.NewGuid();
-            decimal bankResponse = await bankService.InvokeWithRetryAsync(client => client.Channel.GetAvailableFunds(user.BankAccountNumber));
+            double bankResponse = await bankService.InvokeWithRetryAsync(client => client.Channel.GetAvailableFunds(user.BankAccountNumber));
             bool stationResponse = await stationService.InvokeWithRetryAsync(client => client.Channel.IsAvailable(purchase));
 
             if (stationResponse && bankResponse >= purchase.Amounts.Sum())
@@ -101,9 +101,9 @@ namespace TransactionCoordinator
             purchase.Username = user.Username;
             for (int i = 0; i < purchase.TripIds.Count; i++)
             {
-                long id = purchase.TripIds[i];
+                string id = purchase.TripIds[i];
                 double price = await stationService.InvokeWithRetryAsync(client => client.Channel.GetTripPrice(id));
-                purchase.Amounts.Add((decimal)price * purchase.Quantities[i]);
+                purchase.Amounts.Add((double)price * purchase.Quantities[i]);
             }
             return await MakePurchase(user, purchase);
         }

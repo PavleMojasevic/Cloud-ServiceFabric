@@ -17,22 +17,26 @@ namespace StationService
         {
             this.StateManager = stateManager;
         }
+
         public override List<TripDB> RetrieveAll()
         {
-            IQueryable<TripDB> results = from g in _table.CreateQuery<TripDB>()
-                                                where g.PartitionKey == _tableName
-                                                select g; 
-            return results.ToList();
-        }
+            {
 
+                IQueryable<TripDB> results = from g in _table.CreateQuery<TripDB>()
+                                             where g.PartitionKey == _tableName
+                                             select g;
+                return results.ToList();
+            }
+        }
         public override async Task SyncTable()
         {
-            var accountsDisc = await this.StateManager.GetOrAddAsync<IReliableDictionary<long, Trip>>("trips");
+
+            var trips = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Trip>>("trips");
 
             using (var tx = this.StateManager.CreateTransaction())
             {
-                Microsoft.ServiceFabric.Data.IAsyncEnumerable<KeyValuePair<long, Trip>> enumerable = await accountsDisc.CreateEnumerableAsync(tx);
-                using (Microsoft.ServiceFabric.Data.IAsyncEnumerator<KeyValuePair<long, Trip>> e = enumerable.GetAsyncEnumerator())
+                IAsyncEnumerable<KeyValuePair<string, Trip>> enumerable = await trips.CreateEnumerableAsync(tx);
+                using (IAsyncEnumerator<KeyValuePair<string, Trip>> e = enumerable.GetAsyncEnumerator())
                 {
                     while (await e.MoveNextAsync(System.Threading.CancellationToken.None).ConfigureAwait(false))
                     {

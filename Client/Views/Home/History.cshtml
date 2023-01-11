@@ -6,7 +6,7 @@
     <form action="~/Home/History" style="margin-bottom: 30px">
         <div class="form-group">
             <label>Sortiranje po</label>
-            <select name="Type" type="text" name="Destination" class="form-control" value="@ViewBag.sortType">
+            <select name="sortType" type="text" name="Destination" class="form-control" value="@ViewBag.sortType">
                 <option value="0">Datumu polaska rastuče</option>
                 <option value="1">Datumu polaska opadajuće</option>
                 <option value="2">Broju preostalih karata rastuće</option>
@@ -17,6 +17,8 @@
         <button class="btn btn-primary" type="submit">Sortiraj</button>
     </form> 
     <b>Sortiranje po:</b>@ViewBag.sortType<br />
+
+    <button class="btn btn-primary" onclick="Refresh()">Osveži</button>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -39,11 +41,19 @@
                     <td>@trip.Destination</td>
                     <td>@trip.Weather</td>
                     <td>@trip.Price</td>
-                    <td>@trip.Depart</td>
-                    <td>@trip.Return</td>
-                    <td>@(trip.TotalTickets- trip.AvailableTickets)</td> 
+                    <td>@trip.Depart.ToString("dd.MM.yyyy")</td>
+                    <td>@trip.Return?.ToString("dd.MM.yyyy")</td>
+                    <td>@trip.AvailableTickets</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>   
+<script>
+
+
+    function Refresh() {
+        window.location = ('/Home/RefreshPurchases');
+
+    }
+</script>
