@@ -56,17 +56,28 @@ namespace BankService
             // TODO: Replace the following sample code with your own logic 
             //       or remove this RunAsync override if it's not needed in your service.
 
-            var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
-            //BankRepository bankRepository = new BankRepository(StateManager);
+            var accounts = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, BankAccount>>("accounts");
+
+            BankRepository bankRepository = new BankRepository(StateManager, "UseDevelopmentStorage=true");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                foreach (BankAccountDB bank in bankRepository.RetrieveAll())
+                {
+                    BankAccount bankAccount = new BankAccount { AccountNumber = bank.AccountNumber, AvailableFunds = bank.AvailableFunds, Username = bank.Username };
+                    await  accounts.TryAddAsync(tx,bankAccount.Username, bankAccount);
+                }
+                await tx.CommitAsync();
+            }
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using (var tx = this.StateManager.CreateTransaction())
-                {  
+                {
                     await tx.CommitAsync();
                 }
-                //await bankRepository.SyncService();
+
+                await bankRepository.SyncService();
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }

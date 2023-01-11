@@ -1,5 +1,6 @@
 ﻿using Common.Interfaces;
 using Common.Models;
+using Microsoft.Azure;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 using System;
@@ -17,8 +18,7 @@ namespace BankService
 
         public BankServiceProvider(IReliableStateManager stateManager)
         {
-            this.StateManager = stateManager;
-            
+            this.StateManager = stateManager; 
         }
 
         public async Task AddAccount(string accountNumber, string username)

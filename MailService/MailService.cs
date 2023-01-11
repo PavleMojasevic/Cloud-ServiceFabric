@@ -59,7 +59,7 @@ namespace MailService
                 await GetMails();
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Working-{0}", ++iterations);
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
             }
         }
         HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:8859") };

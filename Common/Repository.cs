@@ -16,16 +16,16 @@ namespace Common
         protected CloudStorageAccount _storageAccount;
         protected CloudTable _table;
         protected string _tableName;
-        public Repository(string tableName)
+        public Repository(string tableName, string connString)
         {
             _tableName = tableName;
+            
             _storageAccount =
-                CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+                CloudStorageAccount.Parse(connString);
             CloudTableClient tableClient = new CloudTableClient(new
                 Uri(_storageAccount.TableEndpoint.AbsoluteUri), _storageAccount.Credentials);
             _table = tableClient.GetTableReference(_tableName + "Table");
-            _table.CreateIfNotExists();
-           // SyncService();
+            _table.CreateIfNotExists(); 
 
         }
         public abstract List<T> RetrieveAll(); 

@@ -7,7 +7,8 @@
     <form action="~/Home/Index" style="margin-bottom: 30px">
         <div class="form-group">
             <label>Tip</label>
-            <select name="Type" type="text" name="Destination" class="form-control" value="@ViewBag.Type">
+            <select name="Type" type="text" name="Destination" class="form-control" value="<% = ViewBag.Type %>">
+                <option value=""></option>
                 <option value="0">Avion</option>
                 <option value="1">Autobus</option>
                 <option value="2">Voz</option>
@@ -15,7 +16,7 @@
         </div>
         <div class="form-group">
             <label>Datum polaska</label>
-            <input type="date" name="Depart" value="@ViewBag.Depart" class="form-control">
+            <input type="date" name="Depart" value="<% = ViewBag.Depart %>" class="form-control">
         </div>
         <div class="form-group">
             <label>Broj dostupnih karata</label>
@@ -23,6 +24,10 @@
         </div>
         <button class="btn btn-primary" type="submit">Filtriraj</button>
     </form>
+    <b>Datum:</b> @ViewBag.Depart   <br />
+    <b>Tip:</b> @ViewBag.Type?.ToString()<br />
+    <b>Količina:</b> @ViewBag.Quantity<br />
+    
     <button class="btn btn-primary" onclick="Refresh()">Osveži</button>
     <table class="table table-striped">
         <thead>
