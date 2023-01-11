@@ -65,6 +65,7 @@ namespace UserService
             using (var tx = this.StateManager.CreateTransaction())
             {
                 purchase.Date = System.DateTime.Now;
+                purchase.Username = username;
                 var users = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, User>>("users");
                 User user = (await users.TryGetValueAsync(tx, username)).Value;
                 user.Purchases.Add(purchase);

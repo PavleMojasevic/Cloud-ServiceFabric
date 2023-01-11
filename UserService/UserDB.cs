@@ -18,7 +18,7 @@ namespace UserService
             Password= user.Password;
             Email= user.Email;
             BankAccountNumber= user.BankAccountNumber;
-
+            Purchases = user.Purchases.Select(x=>new PurchaseDB(x)).ToList();
             PartitionKey = "User";
             RowKey = user.Username;
         }
@@ -26,7 +26,7 @@ namespace UserService
         public string Password { get; set; } 
         public string Email { get; set; } 
         public string BankAccountNumber { get; set; } 
-        public List<Purchase> Purchases { get; set; } = new List<Purchase>();
+        public List<PurchaseDB> Purchases { get; set; } = new List<PurchaseDB>();
 
     }
 }

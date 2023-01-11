@@ -78,12 +78,12 @@ namespace UserService
                 foreach (var userDB in usersDB)
                 {
                     User user = new User
-                    { 
-                        Username= userDB.Username,
-                        BankAccountNumber= userDB.BankAccountNumber,
-                        Email= userDB.Email,
-                        Password=userDB.Password,
-                        Purchases = userDB.Purchases
+                    {
+                        Username = userDB.Username,
+                        BankAccountNumber = userDB.BankAccountNumber,
+                        Email = userDB.Email,
+                        Password = userDB.Password,
+                        Purchases = userDB.Purchases.Select(x => x.GetPurchase()).ToList()
                     };
                     await users.TryAddAsync(tx, user.Username, user);
                 }
